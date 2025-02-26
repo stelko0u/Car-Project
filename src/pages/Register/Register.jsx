@@ -32,10 +32,8 @@ const Register = () => {
   }
 
   return (
-    // <div className="flex flex-col bg-blue-700 p-5 text-white w-1/4 rounded-md max-h-screen overflow-auto">
-
-    <div className="flex justify-center items-center overflow-auto" style={{ height: "90vh" }}>
-      <div className="flex flex-col bg-blue-800 p-5 text-white w-1/4 rounded-md">
+    <div className="flex justify-center items-center overflow-auto h-screen">
+      <div className="flex flex-col bg-car-600 p-5 text-white w-1/4 rounded-md">
         <h1 className="text-3xl font-bold text-center pb-4">Register</h1>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-3 w-full">
@@ -72,7 +70,7 @@ const Register = () => {
           </span>
           <p className="text-center text-l">
             Already have an account?{" "}
-            <Link to="/login" className="text-green-500 font-bold">
+            <Link to="/login" className="text-blue-500 font-bold">
               Login
             </Link>
           </p>

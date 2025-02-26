@@ -19,37 +19,44 @@ export const Header = () => {
   }
 
   return (
-    <header className="bg-blue-600 text-white p-3">
+    <header className="bg-car-500 text-white p-3">
       <div className="flex justify-between">
-        <h1 className="text-xl font-bold">AutoCar</h1>
-        <nav className="hidden md:flex space-x-3">
-          <Link to="/" className="hover:mt-0.5">
-            Home
-          </Link>
-          <Link to="/about" className="hover:mt-0.5">
-            About
-          </Link>
-          <Link to="/services" className="hover:mt-0.5">
-            Services
-          </Link>
-          <Link to="/contact" className="hover:mt-0.5">
-            Contact
-          </Link>
-
-          {!isAuthenticated ? (
-            <>
-              <Link to="/login" className="hover:mt-0.5">
-                Login
-              </Link>
-              <Link to="/register" className="hover:mt-0.5">
-                Register
-              </Link>
-            </>
-          ) : (
-            <button onClick={handleLogout} className="hover:mt-0.5">
-              Logout
-            </button>
-          )}
+        <nav className="hidden md:flex space-x-3 flex justify-between w-full ">
+          <h1 className="text-xl font-bold">AutoCar</h1>
+          <span className="flex justify-between space-x-3">
+            <Link to="/" className="hover:mt-0.5">
+              Home
+            </Link>
+            <Link to="/about" className="hover:mt-0.5">
+              About
+            </Link>
+            <Link to="/catalog">Catalog</Link>
+            <Link to="/services" className="hover:mt-0.5">
+              Services
+            </Link>
+            <Link to="/contact" className="hover:mt-0.5">
+              Contact
+            </Link>
+            <Link to="/add" className="hover:mt-0.5">
+              Add car
+            </Link>
+          </span>
+          <span className="flex justify-between space-x-3">
+            {!isAuthenticated ? (
+              <>
+                <Link to="/login" className="hover:mt-0.5">
+                  Login
+                </Link>
+                <Link to="/register" className="hover:mt-0.5">
+                  Register
+                </Link>
+              </>
+            ) : (
+              <button onClick={handleLogout} className="hover:mt-0.5">
+                Logout
+              </button>
+            )}
+          </span>
         </nav>
 
         <button className="md:hidden p-1" onClick={() => setIsOpen(!isOpen)}>
