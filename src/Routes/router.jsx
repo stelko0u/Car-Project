@@ -9,6 +9,7 @@ import About from "../pages/About/About.jsx";
 import Catalog from "../pages/Catalog/Catalog.jsx";
 import CarForm from "../pages/CarFom/CarForm.jsx";
 import bg from "../../public/bg.jpg";
+import Details from "../pages/Details/Details.jsx";
 export const Layout = () => {
   const outletStyle = {
     backgroundImage: `url(${bg})`, // Use the imported image directly
@@ -37,7 +38,7 @@ export const router = createBrowserRouter([
       { path: "/about", element: <About /> },
       { path: "/catalog", element: <Catalog /> },
       { path: "/add", element: <CarForm /> },
-
+      { path: "/details/:id", element: <Details /> },
       {
         element: <UserGuard />,
         children: [

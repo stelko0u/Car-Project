@@ -16,6 +16,13 @@ export default {
           900: "#37395f",
         },
       },
+      boxShadow: {
+        "custom-black":
+          "0px 4px 6px -1px rgba(0, 0, 0, 0.75), 0px 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      },
+      fontFamily: {
+        "dm-sans": ['"DM Sans"', "sans-serif"],
+      },
     },
   },
   plugins: [require("daisyui")],

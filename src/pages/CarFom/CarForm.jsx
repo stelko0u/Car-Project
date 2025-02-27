@@ -1,23 +1,34 @@
 import React, { useState } from "react";
-import Dropzone from "../../components/Header/DropZone/DropZone";
+import Dropzone from "../../components/DropZone/DropZone";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 function CarForm() {
   const [selectedStartYear, setSelectedStartYear] = useState("");
+  const [endYearOptions, setEndYearOptions] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState("");
   const [models, setModels] = useState([]);
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [carInfo, setCarInfo] = useState({
     brand: "",
     model: "",
     gearbox: "",
     color: "",
+    price: null,
+    owner: "",
+    fuelType: "",
+    power: null,
+    displacement: null,
+    odometer: null,
   });
+  const [error, setError] = useState(null);
   const startYear = 1920;
   const endYear = 2025;
-
+  const navigate = useNavigate();
   const years = [];
   for (let year = startYear; year <= endYear; year++) {
     years.push(year);
@@ -91,6 +102,8 @@ function CarForm() {
     "Silver Gray",
   ];
 
+  const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
+
   const features = [
     "Air Conditioning",
     "Leather Seats",
@@ -117,7 +130,7 @@ function CarForm() {
     "On-board Computer",
     "Sunroof",
     "Multifunction Steering Wheel",
-    "4x4 Drive", // 4х4
+    "4x4 Drive",
     "Automatic Climate Control",
     "Tuning",
   ];
@@ -149,48 +162,104 @@ function CarForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Reference to Firebase Storage
+    // Check if all required fields are filled
+    const requiredFields = [
+      "brand",
+      "model",
+      "gearbox",
+      "color",
+      "fuelType",
+      "power",
+      "displacement",
+      "odometer",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !carInfo[field]);
+
+    if (!selectedStartYear) {
+      missingFields.push("year");
+    }
+
+    if (missingFields.length > 0) {
+      setError(`Please fill in all required fields: ${missingFields.join(", ")}`);
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("No user is currently authenticated.");
+      return;
+    }
+
     const storage = getStorage();
 
-    // Upload files and get URLs
-    const fileUploadPromises = files.map(async (file) => {
-      const fileRef = ref(storage, `cars/${file.name}`);
-      await uploadBytes(fileRef, file);
-      return await getDownloadURL(fileRef);
-    });
-
-    const photoURLs = await Promise.all(fileUploadPromises);
-
-    // Create car object
-    const newCar = {
-      ...carInfo,
-      year: selectedStartYear,
-      features: selectedFeatures,
-      photos: photoURLs,
-    };
-
     try {
-      // Reference to Firestore
+      const fileUploadPromises = files.map(async (file) => {
+        const fileRef = ref(storage, `cars/${file.name}`);
+        await uploadBytes(fileRef, file);
+        return await getDownloadURL(fileRef);
+      });
+      const photoURLs = await Promise.all(fileUploadPromises);
+
+      const newCar = {
+        ...carInfo,
+        year: selectedStartYear,
+        features: selectedFeatures,
+        photos: photoURLs,
+        owner: user.email,
+      };
+
       const db = getFirestore();
       const carsCollectionRef = collection(db, "cars");
 
-      // Add new car data to Firestore
+      setLoading(true);
       await addDoc(carsCollectionRef, newCar);
-
-      console.log("Car added to Firestore:", newCar);
+      setLoading(false);
+      navigate("/catalog");
     } catch (error) {
-      console.error("Error adding car to Firestore:", error);
+      setError("Error uploading data, please try again later.");
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
     }
   };
-
+  // <span className="loading loading-ring loading-lg"></span>
   return (
-    <div className="p-4 bg-white">
-      <div className="flex flex-col gap-4 justify-center ">
+    <div className="relative p-4 bg-white">
+      {error && (
+        <div role="alert" className="alert alert-error absolute top-0 right-0 mt-2 mr-2 w-80">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-12 w-12 shrink-0 stroke-current"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <span className="loading loading-dots loading-lg custom-spinner"></span>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-4 justify-center">
         <h1 className="text-2xl font-bold text-start text-black">Add a new car</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
-          <span className="flex flex-row gap-3 w-full">
+          <span className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <select
-              className="select select-bordered w-32 max-w-xs bg-car-400 text-black"
+              className="select select-bordered w-full bg-car-400 text-black"
               onChange={handleBrandChange}
               value={selectedBrand}
               name="brand"
@@ -206,7 +275,7 @@ function CarForm() {
             </select>
 
             <select
-              className="select select-bordered w-32 max-w-xs bg-car-400 text-black"
+              className="select select-bordered w-full bg-car-400 text-black"
               disabled={!models.length}
               name="model"
               onChange={handleChange}
@@ -222,7 +291,7 @@ function CarForm() {
             </select>
 
             <select
-              className="select select-bordered w-32 max-w-xs bg-car-400 text-black"
+              className="select select-bordered w-full bg-car-400 text-black"
               onChange={handleStartYearChange}
               value={selectedStartYear}
               name="year"
@@ -238,7 +307,7 @@ function CarForm() {
             </select>
 
             <select
-              className="select select-bordered w-32 max-w-xs bg-car-400 text-black"
+              className="select select-bordered w-full bg-car-400 text-black"
               name="gearbox"
               onChange={handleChange}
             >
@@ -253,7 +322,7 @@ function CarForm() {
               </option>
             </select>
             <select
-              className="select select-bordered w-32 max-w-xs bg-car-400 text-black"
+              className="select select-bordered w-full bg-car-400 text-black"
               name="color"
               onChange={handleChange}
             >
@@ -261,40 +330,91 @@ function CarForm() {
                 Color
               </option>
               {colors.map((color) => (
-                <option key={color} value={color.toLowerCase()}>
+                <option key={color} value={color}>
                   {color}
                 </option>
               ))}
             </select>
-          </span>
-          <span>
-            <h2>Select car features:</h2>
-            <span className="flex flex-col gap-2 justify-start" style={gridStyle}>
-              {features.map((feature) => (
-                <label key={feature} className="flex flex-row  align-middle">
-                  <input
-                    type="checkbox"
-                    checked={selectedFeatures.includes(feature)}
-                    onChange={() => handleCheckboxChange(feature)}
-                    className="checkbox checkbox-primary"
-                  />
-                  <label htmlFor="checkbox" className="mx-2">
-                    {feature}
-                  </label>
-                </label>
+
+            <select
+              className="select select-bordered w-full bg-car-400 text-black"
+              name="fuelType"
+              onChange={handleChange}
+            >
+              <option disabled selected>
+                Fuel Type
+              </option>
+              {fuelTypes.map((fuel) => (
+                <option key={fuel} value={fuel}>
+                  {fuel}
+                </option>
               ))}
-            </span>
+            </select>
+
+            <input
+              type="number"
+              placeholder="Power (HP)"
+              className="input w-full bg-car-400 placeholder-black font-light text-black"
+              min="0"
+              name="power"
+              value={carInfo.power}
+              onChange={handleChange}
+            />
+            <input
+              type="number"
+              placeholder="Price ($)"
+              className="input w-full bg-car-400 placeholder-black font-light text-black"
+              min="0"
+              name="price"
+              value={carInfo.price}
+              onChange={handleChange}
+            />
+            <input
+              type="number"
+              placeholder="Displacement (cc)"
+              className="input w-full bg-car-400 placeholder-black font-light text-black"
+              min="0"
+              name="displacement"
+              value={carInfo.displacement}
+              onChange={handleChange}
+            />
+
+            <input
+              type="number"
+              placeholder="Odometer (km)"
+              className="input w-full bg-car-400 placeholder-black font-light text-black"
+              min="0"
+              name="odometer"
+              value={carInfo.odometer}
+              onChange={handleChange}
+            />
           </span>
+
+          <h2>Select car features:</h2>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+            {features.map((feature) => (
+              <label key={feature} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedFeatures.includes(feature)}
+                  onChange={() => handleCheckboxChange(feature)}
+                  className="checkbox checkbox-primary"
+                />
+                <span>{feature}</span>
+              </label>
+            ))}
+          </div>
+
           <Dropzone
             onDrop={(acceptedFiles) => setFiles((prevFiles) => [...prevFiles, ...acceptedFiles])}
           />
-          <span className="flex justify-end">
+          <div className="flex justify-end mt-4">
             <input
               type="submit"
               value="Add"
               className="bg-car-500 text-white p-2 rounded-md hover:cursor-pointer px-12"
             />
-          </span>
+          </div>
         </form>
       </div>
     </div>
