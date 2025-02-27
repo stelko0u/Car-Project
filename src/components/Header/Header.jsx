@@ -30,7 +30,9 @@ export const Header = () => {
             <Link to="/about" className="hover:mt-0.5">
               About
             </Link>
-            <Link to="/catalog">Catalog</Link>
+            <Link to="/catalog" className="hover:mt-0.5">
+              Catalog
+            </Link>
             <Link to="/services" className="hover:mt-0.5">
               Services
             </Link>
