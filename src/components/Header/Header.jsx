@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../Context/AuthContext"; // Пътя може да е различен в зависимост от проекта
+import { AuthContext } from "../../Context/AuthContext";
 import { getAuth, signOut } from "firebase/auth";
 
 export const Header = () => {
@@ -13,16 +13,21 @@ export const Header = () => {
     e.preventDefault();
     try {
       await signOut(auth);
+      setIsOpen(false); // Затваряне на менюто след излизане
     } catch (error) {
       console.log(error);
     }
   }
 
+  function closeMenu() {
+    setIsOpen(false);
+  }
+
   return (
     <header className="bg-car-500 text-white p-3">
       <div className="flex justify-between">
-        <nav className="hidden md:flex space-x-3 flex justify-between w-full ">
-          <h1 className="text-xl font-bold">AutoCar</h1>
+        <nav className="hidden md:flex space-x-3 flex justify-between w-full">
+          <h1 className="text-xl font-bold">CarDeals</h1>
           <span className="flex justify-between space-x-3">
             <Link to="/" className="hover:mt-0.5">
               Home
@@ -39,9 +44,11 @@ export const Header = () => {
             <Link to="/contact" className="hover:mt-0.5">
               Contact
             </Link>
-            <Link to="/add" className="hover:mt-0.5">
-              Add car
-            </Link>
+            {isAuthenticated && (
+              <Link to="/add" className="hover:mt-0.5">
+                Add car
+              </Link>
+            )}
           </span>
           <span className="flex justify-between space-x-3">
             {!isAuthenticated ? (
@@ -61,34 +68,45 @@ export const Header = () => {
           </span>
         </nav>
 
-        <button className="md:hidden p-1" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <span className="md:hidden p-1 flex justify-between items-center w-screen">
+          <h1 className="text-xl font-bold">AutoCar</h1>
+          <button className="md:hidden p-1 " onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </span>
       </div>
 
       {isOpen && (
-        <nav className="md:hidden p-4 flex flex-col space-y-2">
-          <a href="#" className="hover:ml-2">
+        <nav className="md:hidden p-4 flex flex-col space-y-2 items-start">
+          <Link to="/" className="hover:ml-2" onClick={closeMenu}>
             Home
-          </a>
-          <a href="#" className="hover:ml-2">
+          </Link>
+          <Link to="/about" className="hover:ml-2" onClick={closeMenu}>
             About
-          </a>
-          <a href="#" className="hover:ml-2">
+          </Link>
+          <Link to="/catalog" className="hover:ml-2" onClick={closeMenu}>
+            Catalog
+          </Link>
+          <Link to="/services" className="hover:ml-2" onClick={closeMenu}>
             Services
-          </a>
-          <a href="#" className="hover:ml-2">
+          </Link>
+          <Link to="/contact" className="hover:ml-2" onClick={closeMenu}>
             Contact
-          </a>
+          </Link>
+          {isAuthenticated && (
+            <Link to="/add" className="hover:ml-2" onClick={closeMenu}>
+              Add car
+            </Link>
+          )}
 
           {!isAuthenticated ? (
             <>
-              <a href="/login" className="hover:ml-2">
+              <Link to="/login" className="hover:ml-2" onClick={closeMenu}>
                 Login
-              </a>
-              <a href="/register" className="hover:ml-2">
+              </Link>
+              <Link to="/register" className="hover:ml-2" onClick={closeMenu}>
                 Register
-              </a>
+              </Link>
             </>
           ) : (
             <button onClick={handleLogout} className="hover:ml-2">

@@ -33,7 +33,7 @@ const Register = () => {
 
   return (
     <div className="flex justify-center items-center overflow-auto h-screen">
-      <div className="flex flex-col bg-car-600 p-5 text-white w-1/4 rounded-md">
+      <div className="flex flex-col bg-car-600 p-5 text-white lg:w-1/4 rounded-md">
         <h1 className="text-3xl font-bold text-center pb-4">Register</h1>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-3 w-full">
@@ -43,7 +43,7 @@ const Register = () => {
           <span>
             <label>Email address:</label>
             <input
-              className="p-2 text-xl flex text-black w-full"
+              className="p-2 text-xl flex text-black bg-white w-full"
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
@@ -53,7 +53,7 @@ const Register = () => {
           <span>
             <label>Password:</label>
             <input
-              className="p-2 text-xl flex text-black w-full"
+              className="p-2 text-xl flex text-black bg-white w-full"
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               required
@@ -62,7 +62,7 @@ const Register = () => {
           <span>
             <label>Confirm password:</label>
             <input
-              className="p-2 text-xl flex text-black w-full"
+              className="p-2 text-xl flex text-black bg-white w-full"
               onChange={(e) => setConfirmPassword(e.target.value)}
               type="password"
               required
