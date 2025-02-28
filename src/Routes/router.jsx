@@ -10,14 +10,18 @@ import Catalog from "../pages/Catalog/Catalog.jsx";
 import CarForm from "../pages/CarFom/CarForm.jsx";
 import bg from "../../public/bg.jpg";
 import Details from "../pages/Details/Details.jsx";
+import EditForm from "../pages/EditForm/EditForm.jsx";
+import { Protected } from "./Protected.jsx";
+import OwnerGuard from "./OwnerGuard.jsx";
+import Footer from "../components/Footer/Footer.jsx";
 export const Layout = () => {
   const outletStyle = {
-    backgroundImage: `url(${bg})`, // Use the imported image directly
-    backgroundSize: "cover", // Adjust as needed
+    backgroundImage: `url(${bg})`,
+    backgroundSize: "cover",
     backgroundPosition: "center",
     minHeight: "calc(100vh - 100px)",
     display: "flex",
-    flexDirection: "column", // Flex properties help in aligning content
+    flexDirection: "column", 
   };
 
   return (
@@ -26,6 +30,7 @@ export const Layout = () => {
       <div style={outletStyle}>
         <Outlet />
       </div>
+      <Footer />
     </>
   );
 };
@@ -37,7 +42,26 @@ export const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/about", element: <About /> },
       { path: "/catalog", element: <Catalog /> },
-      { path: "/add", element: <CarForm /> },
+      {
+        path: "/add",
+        element: (
+          <Protected>
+            <CarForm />
+          </Protected>
+        ),
+      },
+      {
+        path: "/edit/:id",
+        element: (
+          <OwnerGuard>
+            <EditForm />
+          </OwnerGuard>
+        ),
+      },
+      {
+        path: "*",
+        element: <h1 className="text-2xl text-white p-2">Error 404 Not found</h1>,
+      },
       { path: "/details/:id", element: <Details /> },
       {
         element: <UserGuard />,

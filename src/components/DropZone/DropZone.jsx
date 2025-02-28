@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDropzone } from "react-dropzone"; // Поправен импортиране
+import { useDropzone } from "react-dropzone";
 
 const Dropzone = ({ onDrop }) => {
   const [files, setFiles] = useState([]);

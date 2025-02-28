@@ -144,7 +144,7 @@ export default function Catalog() {
     <div className="p-8 w-full bg-slate-300">
       <h1 className="text-2xl font-bold text-black">Catalog Page</h1>
 
-      <div className="flex gap-4 my-4">
+      <div className="flex gap-4 my-4 lg:flex-row flex-col">
         <select
           onChange={handleBrandChange}
           value={filters.brand}
@@ -178,8 +178,8 @@ export default function Catalog() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative w-full w-4/5 h-2/3">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 " onClick={closeModal}>
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-full w-4/5 h-2/3" onClick={(e) => e.stopPropagation()}>
             <span className="flex  justify-between mb-4 items-center">
               <h2 className="text-xl font-bold mb-4 text-slate-600">Select Features</h2>
               <button
@@ -189,7 +189,7 @@ export default function Catalog() {
                 Close
               </button>
             </span>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
               {featuresList.map((feature) => (
                 <label key={feature} className="flex items-center">
                   <input

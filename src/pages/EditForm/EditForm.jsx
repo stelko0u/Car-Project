@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Dropzone from "../../components/DropZone/DropZone";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { X } from "lucide-react";
 
-function CarForm() {
+function EditForm() {
+  const { id: carId } = useParams();
   const [selectedStartYear, setSelectedStartYear] = useState("");
   const [endYearOptions, setEndYearOptions] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
@@ -26,36 +28,23 @@ function CarForm() {
     odometer: null,
   });
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
   const startYear = 1920;
   const endYear = 2025;
-  const navigate = useNavigate();
   const years = [];
   for (let year = startYear; year <= endYear; year++) {
     years.push(year);
   }
-
-  const handleStartYearChange = (event) => {
-    const selectedYear = parseInt(event.target.value, 10);
-    setSelectedStartYear(selectedYear);
-    const filteredEndYears = years.filter((year) => year >= selectedYear);
-    setEndYearOptions(filteredEndYears);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCarInfo({
-      ...carInfo,
-      [name]: value,
-    });
-  };
 
   const brandAndModels = {
     Audi: [
       "80",
       "90",
       "100",
-      "А1",
-      "А2",
+      "A1",
+      "A2",
       "A3",
       "A4",
       "A5",
@@ -88,6 +77,148 @@ function CarForm() {
     Jaguar: ["XE", "XF", "F-Type", "E-Pace", "F-Pace", "I-Pace"],
     Subaru: ["Impreza", "Forester", "Outback", "XV", "BRZ", "Levorg"],
   };
+
+  useEffect(() => {
+    const fetchCarData = async () => {
+      const db = getFirestore();
+      try {
+        const carDoc = await getDoc(doc(db, "cars", carId));
+
+        if (carDoc.exists()) {
+          const carData = carDoc.data();
+
+          setCarInfo(carData);
+          setSelectedStartYear(carData.year);
+          setSelectedBrand(carData.brand);
+          setModels(brandAndModels[carData.brand] || []);
+          setSelectedFeatures(carData.features || []);
+          setFiles(carData.photos || []);
+        } else {
+          console.error("No car found with this ID.");
+          navigate("/catalog");
+        }
+      } catch (error) {
+        console.error("Error fetching car data:", error);
+        navigate("/catalog");
+      }
+    };
+
+    fetchCarData();
+  }, [carId, navigate]);
+
+  const handleStartYearChange = (event) => {
+    const selectedYear = parseInt(event.target.value, 10);
+    setSelectedStartYear(selectedYear);
+    const filteredEndYears = years.filter((year) => year >= selectedYear);
+    setEndYearOptions(filteredEndYears);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCarInfo({
+      ...carInfo,
+      [name]: value,
+    });
+  };
+
+  const handleCheckboxChange = (feature) => {
+    setSelectedFeatures((prevSelectedFeatures) =>
+      prevSelectedFeatures.includes(feature)
+        ? prevSelectedFeatures.filter((item) => item !== feature)
+        : [...prevSelectedFeatures, feature]
+    );
+  };
+
+  const handleBrandChange = (event) => {
+    const brand = event.target.value;
+    setSelectedBrand(brand);
+    setModels(brandAndModels[brand] || []);
+    setCarInfo((prevInfo) => ({
+      ...prevInfo,
+      brand,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const requiredFields = [
+      "brand",
+      "model",
+      "gearbox",
+      "color",
+      "fuelType",
+      "power",
+      "displacement",
+      "odometer",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !carInfo[field]);
+
+    if (!selectedStartYear) {
+      missingFields.push("year");
+    }
+
+    if (missingFields.length > 0) {
+      setError(`Please fill in all required fields: ${missingFields.join(", ")}`);
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("No user is currently authenticated.");
+      return;
+    }
+
+    const storage = getStorage();
+
+    try {
+      setLoading(true);
+
+      // Филтрираме `files`:
+      // - `existingPhotos` са URL адресите
+      // - `newFiles` са новите файлове, които трябва да се качат
+      const existingPhotos = files.filter((file) => typeof file === "string");
+      const newFiles = files.filter((file) => typeof file !== "string");
+
+      // Качване само на новите файлове
+      const fileUploadPromises = newFiles.map(async (file) => {
+        const fileRef = ref(storage, `cars/${file.name}`);
+        await uploadBytes(fileRef, file);
+        return await getDownloadURL(fileRef);
+      });
+
+      const uploadedPhotoURLs = await Promise.all(fileUploadPromises);
+
+      // Комбиниране на старите и новите снимки
+      const allPhotos = [...existingPhotos, ...uploadedPhotoURLs];
+
+      const updatedCar = {
+        ...carInfo,
+        year: selectedStartYear,
+        features: selectedFeatures,
+        photos: allPhotos, // Запазване на старите + новите снимки
+        owner: user.email,
+      };
+
+      const db = getFirestore();
+      const carDocRef = doc(db, "cars", carId);
+
+      await updateDoc(carDocRef, updatedCar);
+      setLoading(false);
+      navigate("/catalog");
+    } catch (error) {
+      setError("Error updating data, please try again later.");
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+      setLoading(false);
+    }
+  };
+
   const colors = [
     "Red",
     "Green",
@@ -135,99 +266,10 @@ function CarForm() {
     "Tuning",
   ];
 
-  const gridStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "10px",
+  const handleRemoveImage = (index) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
-  const handleCheckboxChange = (feature) => {
-    setSelectedFeatures((prevSelectedFeatures) =>
-      prevSelectedFeatures.includes(feature)
-        ? prevSelectedFeatures.filter((item) => item !== feature)
-        : [...prevSelectedFeatures, feature]
-    );
-  };
-
-  const handleBrandChange = (event) => {
-    const brand = event.target.value;
-    setSelectedBrand(brand);
-    setModels(brandAndModels[brand] || []);
-    setCarInfo((prevInfo) => ({
-      ...prevInfo,
-      brand: brand,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Check if all required fields are filled
-    const requiredFields = [
-      "brand",
-      "model",
-      "gearbox",
-      "price",
-      "color",
-      "fuelType",
-      "power",
-      "displacement",
-      "odometer",
-    ];
-
-    const missingFields = requiredFields.filter((field) => !carInfo[field]);
-
-    if (!selectedStartYear) {
-      missingFields.push("year");
-    }
-
-    if (missingFields.length > 0) {
-      setError(`Please fill in all required fields: ${missingFields.join(", ")}`);
-      setTimeout(() => setError(null), 5000);
-      return;
-    }
-
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.error("No user is currently authenticated.");
-      return;
-    }
-
-    const storage = getStorage();
-
-    try {
-      const fileUploadPromises = files.map(async (file) => {
-        const fileRef = ref(storage, `cars/${file.name}`);
-        await uploadBytes(fileRef, file);
-        return await getDownloadURL(fileRef);
-      });
-      const photoURLs = await Promise.all(fileUploadPromises);
-
-      const newCar = {
-        ...carInfo,
-        year: selectedStartYear,
-        features: selectedFeatures,
-        photos: photoURLs,
-        owner: user.email,
-      };
-
-      const db = getFirestore();
-      const carsCollectionRef = collection(db, "cars");
-
-      setLoading(true);
-      await addDoc(carsCollectionRef, newCar);
-      setLoading(false);
-      navigate("/catalog");
-    } catch (error) {
-      setError("Error uploading data, please try again later.");
-      setTimeout(() => {
-        setError(null);
-      }, 5000);
-    }
-  };
-  // <span className="loading loading-ring loading-lg"></span>
   return (
     <div className="relative p-4 bg-white">
       {error && (
@@ -256,7 +298,7 @@ function CarForm() {
       )}
 
       <div className="flex flex-col gap-4 justify-center">
-        <h1 className="text-2xl font-bold text-start text-black">Add a new car</h1>
+        <h1 className="text-2xl font-bold text-start text-black">Edit car information</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
           <span className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <select
@@ -265,7 +307,7 @@ function CarForm() {
               value={selectedBrand}
               name="brand"
             >
-              <option disabled selected value="">
+              <option disabled value="">
                 Brand
               </option>
               {Object.keys(brandAndModels).map((brand) => (
@@ -280,8 +322,9 @@ function CarForm() {
               disabled={!models.length}
               name="model"
               onChange={handleChange}
+              value={carInfo.model}
             >
-              <option disabled selected value="">
+              <option disabled value="">
                 Model
               </option>
               {models.map((model) => (
@@ -297,7 +340,7 @@ function CarForm() {
               value={selectedStartYear}
               name="year"
             >
-              <option disabled selected value="">
+              <option disabled value="">
                 Year
               </option>
               {years.map((year) => (
@@ -311,10 +354,9 @@ function CarForm() {
               className="select select-bordered w-full bg-car-400 text-black"
               name="gearbox"
               onChange={handleChange}
+              value={carInfo.gearbox}
             >
-              <option disabled selected>
-                Gearbox
-              </option>
+              <option disabled>Gearbox</option>
               <option value="automatic" key="automatic">
                 Automatic
               </option>
@@ -326,10 +368,9 @@ function CarForm() {
               className="select select-bordered w-full bg-car-400 text-black"
               name="color"
               onChange={handleChange}
+              value={carInfo.color}
             >
-              <option disabled selected>
-                Color
-              </option>
+              <option disabled>Color</option>
               {colors.map((color) => (
                 <option key={color} value={color}>
                   {color}
@@ -341,10 +382,9 @@ function CarForm() {
               className="select select-bordered w-full bg-car-400 text-black"
               name="fuelType"
               onChange={handleChange}
+              value={carInfo.fuelType}
             >
-              <option disabled selected>
-                Fuel Type
-              </option>
+              <option disabled>Fuel Type</option>
               {fuelTypes.map((fuel) => (
                 <option key={fuel} value={fuel}>
                   {fuel}
@@ -358,7 +398,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="power"
-              value={carInfo.power}
+              value={carInfo.power || ""}
               onChange={handleChange}
             />
             <input
@@ -367,7 +407,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="price"
-              value={carInfo.price}
+              value={carInfo.price || ""}
               onChange={handleChange}
             />
             <input
@@ -376,7 +416,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="displacement"
-              value={carInfo.displacement}
+              value={carInfo.displacement || ""}
               onChange={handleChange}
             />
 
@@ -386,7 +426,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="odometer"
-              value={carInfo.odometer}
+              value={carInfo.odometer || ""}
               onChange={handleChange}
             />
           </span>
@@ -405,14 +445,32 @@ function CarForm() {
               </label>
             ))}
           </div>
-
+          <h2 className="text-lg font-semibold">Existing Photos</h2>
+          <div className="flex flex-wrap gap-2">
+            {files.map((file, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={typeof file === "string" ? file : URL.createObjectURL(file)}
+                  alt={`Car ${index + 1}`}
+                  className="w-32 h-32 object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-500 text-white p-0.5 m-0.5 rounded-full"
+                  onClick={() => handleRemoveImage(index)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            ))}
+          </div>
           <Dropzone
             onDrop={(acceptedFiles) => setFiles((prevFiles) => [...prevFiles, ...acceptedFiles])}
           />
           <div className="flex justify-end mt-4">
             <input
               type="submit"
-              value="Add"
+              value="Edit"
               className="bg-car-500 text-white p-2 rounded-md hover:cursor-pointer px-12"
             />
           </div>
@@ -422,4 +480,4 @@ function CarForm() {
   );
 }
 
-export default CarForm;
+export default EditForm;
