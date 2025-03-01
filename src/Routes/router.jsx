@@ -14,6 +14,7 @@ import EditForm from "../pages/EditForm/EditForm.jsx";
 import { Protected } from "./Protected.jsx";
 import OwnerGuard from "./OwnerGuard.jsx";
 import Footer from "../components/Footer/Footer.jsx";
+import NotFound from "../pages/NotFound/NotFound.jsx";
 export const Layout = () => {
   const outletStyle = {
     backgroundImage: `url(${bg})`,
@@ -21,7 +22,7 @@ export const Layout = () => {
     backgroundPosition: "center",
     minHeight: "calc(100vh - 100px)",
     display: "flex",
-    flexDirection: "column", 
+    flexDirection: "column",
   };
 
   return (
@@ -60,7 +61,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <h1 className="text-2xl text-white p-2">Error 404 Not found</h1>,
+        element: <NotFound />,
       },
       { path: "/details/:id", element: <Details /> },
       {
