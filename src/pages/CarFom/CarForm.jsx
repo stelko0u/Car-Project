@@ -24,6 +24,7 @@ function CarForm() {
     power: null,
     displacement: null,
     odometer: null,
+    phone: "", 
   });
   const [error, setError] = useState(null);
   const startYear = 1920;
@@ -88,6 +89,7 @@ function CarForm() {
     Jaguar: ["XE", "XF", "F-Type", "E-Pace", "F-Pace", "I-Pace"],
     Subaru: ["Impreza", "Forester", "Outback", "XV", "BRZ", "Levorg"],
   };
+
   const colors = [
     "Red",
     "Green",
@@ -135,12 +137,6 @@ function CarForm() {
     "Tuning",
   ];
 
-  const gridStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "10px",
-  };
-
   const handleCheckboxChange = (feature) => {
     setSelectedFeatures((prevSelectedFeatures) =>
       prevSelectedFeatures.includes(feature)
@@ -161,8 +157,8 @@ function CarForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Check if all required fields are filled
     const requiredFields = [
       "brand",
       "model",
@@ -173,12 +169,20 @@ function CarForm() {
       "power",
       "displacement",
       "odometer",
+      "phone", 
     ];
 
     const missingFields = requiredFields.filter((field) => !carInfo[field]);
 
     if (!selectedStartYear) {
       missingFields.push("year");
+    }
+
+    const phoneRegex = /^(088|089|087)\d{7}$/;
+    if (!phoneRegex.test(carInfo.phone)) {
+      setError("Invalid phone number format. Please enter a valid phone number.");
+      setTimeout(() => setError(null), 5000);
+      return;
     }
 
     if (missingFields.length > 0) {
@@ -216,7 +220,6 @@ function CarForm() {
       const db = getFirestore();
       const carsCollectionRef = collection(db, "cars");
 
-      setLoading(true);
       await addDoc(carsCollectionRef, newCar);
       setLoading(false);
       navigate("/catalog");
@@ -227,24 +230,11 @@ function CarForm() {
       }, 5000);
     }
   };
-  // <span className="loading loading-ring loading-lg"></span>
+
   return (
     <div className="relative p-4 bg-white">
       {error && (
         <div role="alert" className="alert alert-error absolute top-0 right-0 mt-2 mr-2 w-80">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-12 w-12 shrink-0 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
           <span>{error}</span>
         </div>
       )}
@@ -388,6 +378,16 @@ function CarForm() {
               name="odometer"
               value={carInfo.odometer}
               onChange={handleChange}
+            />
+
+            <input
+              type="number"
+              placeholder="Phone Number"
+              className="input w-full bg-car-400 placeholder-black font-light text-black"
+              name="phone"
+              value={carInfo.phone}
+              onChange={handleChange}
+              required 
             />
           </span>
 

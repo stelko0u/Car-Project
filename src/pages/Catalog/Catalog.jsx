@@ -178,8 +178,14 @@ export default function Catalog() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 " onClick={closeModal}>
-          <div className="bg-white p-6 rounded-lg shadow-lg relative w-full w-4/5 h-2/3" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 "
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg relative w-4/5 h-2/3"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="flex  justify-between mb-4 items-center">
               <h2 className="text-xl font-bold mb-4 text-slate-600">Select Features</h2>
               <button
