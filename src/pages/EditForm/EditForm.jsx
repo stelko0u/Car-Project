@@ -178,13 +178,9 @@ function EditForm() {
     try {
       setLoading(true);
 
-      // Филтрираме `files`:
-      // - `existingPhotos` са URL адресите
-      // - `newFiles` са новите файлове, които трябва да се качат
       const existingPhotos = files.filter((file) => typeof file === "string");
       const newFiles = files.filter((file) => typeof file !== "string");
 
-      // Качване само на новите файлове
       const fileUploadPromises = newFiles.map(async (file) => {
         const fileRef = ref(storage, `cars/${file.name}`);
         await uploadBytes(fileRef, file);
@@ -193,14 +189,13 @@ function EditForm() {
 
       const uploadedPhotoURLs = await Promise.all(fileUploadPromises);
 
-      // Комбиниране на старите и новите снимки
       const allPhotos = [...existingPhotos, ...uploadedPhotoURLs];
 
       const updatedCar = {
         ...carInfo,
         year: selectedStartYear,
         features: selectedFeatures,
-        photos: allPhotos, // Запазване на старите + новите снимки
+        photos: allPhotos, 
         owner: user.email,
       };
 

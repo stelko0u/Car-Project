@@ -13,7 +13,7 @@ export const Header = () => {
     e.preventDefault();
     try {
       await signOut(auth);
-      setIsOpen(false); // Затваряне на менюто след излизане
+      setIsOpen(false);
     } catch (error) {
       console.log(error);
     }

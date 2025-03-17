@@ -1,4 +1,3 @@
-// routes.js
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import Home from "../pages/Home/Home.jsx";
 import Register from "../pages/Register/Register.jsx";

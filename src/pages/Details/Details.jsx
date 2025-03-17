@@ -104,13 +104,14 @@ export default function Details() {
               <p>Year: {car.year}</p>
               <p>Power: {car.power} HP</p>
               <p>Price: ${car.price}</p>
-              {/* <p>Owner: {car.owner}</p> */}
+              <p>Phone number: {car.phone}</p>
+              <p>Owner: {car.owner}</p>
               <p>Features: {car.features.join(", ")}</p>
             </span>
             <span>
               {isOwner && (
                 <div className="flex gap-2 mt-4 lg:flex-row flex-col w-full">
-                  <button className="btn btn-primary lg:w-auto flex w-" onClick={handleEdit}>
+                  <button className="btn btn-primary lg:w-auto flex " onClick={handleEdit}>
                     Edit
                   </button>
                   <button className="btn btn-danger" onClick={handleDelete}>

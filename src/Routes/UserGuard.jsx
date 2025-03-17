@@ -6,15 +6,13 @@ const UserGuard = ({ redirectPath = "/" }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div>Loading...</div>; // или спинер, ако предпочиташ
+    return <div>Loading...</div>;
   }
 
-  // Ако потребителят е вече ауторизиран, редиректваме го към началната страница
   if (isAuthenticated) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Ако потребителят не е ауторизиран, рендираме децата
   return <Outlet />;
 };
 
