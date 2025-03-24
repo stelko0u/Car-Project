@@ -16,7 +16,8 @@ import Footer from "../components/Footer/Footer.jsx";
 import NotFound from "../pages/NotFound/NotFound.jsx";
 export const Layout = () => {
   const outletStyle = {
-    backgroundImage: `url(${bg})`,
+    backgroundColor: "white",
+    // backgroundImage: `url(${bg})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     minHeight: "calc(100vh - 100px)",

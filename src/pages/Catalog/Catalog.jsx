@@ -141,7 +141,7 @@ export default function Catalog() {
   const closeModal = () => setModalOpen(false);
 
   return (
-    <div className="p-8 w-full bg-slate-300">
+    <div className="p-8 w-full ">
       <h1 className="text-2xl font-bold text-black">Catalog Page</h1>
 
       <div className="flex gap-4 my-4 lg:flex-row flex-col">

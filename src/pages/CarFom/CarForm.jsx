@@ -24,7 +24,8 @@ function CarForm() {
     power: null,
     displacement: null,
     odometer: null,
-    phone: "", 
+    phone: "",
+    views,
   });
   const [error, setError] = useState(null);
   const startYear = 1920;
@@ -169,7 +170,7 @@ function CarForm() {
       "power",
       "displacement",
       "odometer",
-      "phone", 
+      "phone",
     ];
 
     const missingFields = requiredFields.filter((field) => !carInfo[field]);
@@ -215,6 +216,7 @@ function CarForm() {
         features: selectedFeatures,
         photos: photoURLs,
         owner: user.email,
+        views: 0,
       };
 
       const db = getFirestore();
@@ -387,7 +389,7 @@ function CarForm() {
               name="phone"
               value={carInfo.phone}
               onChange={handleChange}
-              required 
+              required
             />
           </span>
 
