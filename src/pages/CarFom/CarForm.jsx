@@ -13,6 +13,7 @@ function CarForm() {
   const [models, setModels] = useState([]);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [views, setViews] = useState(0);
   const [carInfo, setCarInfo] = useState({
     brand: "",
     model: "",

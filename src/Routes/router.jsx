@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Link, Outlet } from "react-router-dom";
 import Home from "../pages/Home/Home.jsx";
 import Register from "../pages/Register/Register.jsx";
 import Login from "../pages/Login/Login.jsx";
@@ -14,10 +14,11 @@ import { Protected } from "./Protected.jsx";
 import OwnerGuard from "./OwnerGuard.jsx";
 import Footer from "../components/Footer/Footer.jsx";
 import NotFound from "../pages/NotFound/NotFound.jsx";
+import Profile from "../pages/Profile/Profile.js";
+
 export const Layout = () => {
   const outletStyle = {
-    backgroundColor: "white",
-    // backgroundImage: `url(${bg})`,
+    // backgroundColor: "#1E1E1E", // dark background color
     backgroundSize: "cover",
     backgroundPosition: "center",
     minHeight: "calc(100vh - 100px)",
@@ -32,6 +33,19 @@ export const Layout = () => {
         <Outlet />
       </div>
       <Footer />
+    </>
+  );
+};
+
+export const AuthLayout = () => {
+  return (
+    <>
+      <div>
+        <Link to="/" className="inline absolute m-1 bg-primary rounded-full p-1 px-2 font-bold">
+          Go to home
+        </Link>
+      </div>
+      <Outlet />
     </>
   );
 };
@@ -52,6 +66,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/profile",
+        element: (
+          <Protected>
+            <Profile />
+          </Protected>
+        ),
+      },
+      {
         path: "/edit/:id",
         element: (
           <OwnerGuard>
@@ -59,18 +81,15 @@ export const router = createBrowserRouter([
           </OwnerGuard>
         ),
       },
-      {
-        path: "*",
-        element: <NotFound />,
-      },
+      { path: "*", element: <NotFound /> },
       { path: "/details/:id", element: <Details /> },
-      {
-        element: <UserGuard />,
-        children: [
-          { path: "/register", element: <Register /> },
-          { path: "/login", element: <Login /> },
-        ],
-      },
+    ],
+  },
+  {
+    element: <AuthLayout />,
+    children: [
+      { path: "/register", element: <Register /> },
+      { path: "/login", element: <Login /> },
     ],
   },
 ]);

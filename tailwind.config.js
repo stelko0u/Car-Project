@@ -4,6 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: "#1E1E1E",
+
         car: {
           100: "#e5e6f5",
           200: "#cccee9",

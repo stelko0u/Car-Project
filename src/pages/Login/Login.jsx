@@ -24,8 +24,11 @@ const Login = () => {
       });
   }
   return (
-    <div className="flex justify-center items-center overflow-hidden h-screen ">
-      <div className="flex flex-col bg-car-600 p-5 text-white lg:w-1/4 rounded-md">
+    <div
+      className="flex justify-center items-center h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg.jpg')" }}
+    >
+      <div className="flex flex-col bg-primary  p-5 text-white lg:w-1/4 rounded-md">
         <h1 className="text-3xl font-bold text-center pb-4">Login</h1>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-3 w-full">
@@ -59,7 +62,7 @@ const Login = () => {
             </Link>
           </p>
           <input
-            className="p-2 text-xl bg-white text-car-700 font-bold cursor-pointer hover:bg-slate-400 hover:text-white transition-all duration-500 rounded-sm"
+            className="p-2 text-xl bg-white text-black font-bold cursor-pointer hover:bg-slate-400 hover:text-white transition-all duration-500 rounded-sm"
             type="submit"
             value="Login"
           />

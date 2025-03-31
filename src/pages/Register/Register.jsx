@@ -32,8 +32,11 @@ const Register = () => {
   }
 
   return (
-    <div className="flex justify-center items-center overflow-auto h-screen">
-      <div className="flex flex-col bg-car-600 p-5 text-white lg:w-1/4 rounded-md">
+    <div
+      className="flex justify-center items-center overflow-auto h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg.jpg')" }}
+    >
+      <div className="flex flex-col bg-primary p-5 text-white lg:w-1/4 rounded-lg">
         <h1 className="text-3xl font-bold text-center pb-4">Register</h1>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-3 w-full">
@@ -75,7 +78,7 @@ const Register = () => {
             </Link>
           </p>
           <input
-            className="p-2 text-xl bg-white text-blue-700 cursor-pointer hover:bg-slate-400 hover:text-white transition-all duration-500 rounded-sm"
+            className="p-2 text-xl bg-white text-black cursor-pointer hover:bg-slate-400 hover:text-white transition-all duration-500 rounded-sm"
             type="submit"
             value="Register"
           />
