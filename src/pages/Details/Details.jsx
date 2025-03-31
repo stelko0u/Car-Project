@@ -1,20 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, deleteDoc, increment, updateDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
-import { PencilLine, Trash2 } from "lucide-react";
+import { Heart, HeartOff, PencilLine, Trash2 } from "lucide-react";
+import { AuthContext } from "../../Context/AuthContext";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 export default function Details() {
+  const { isAuthenticated } = useContext(AuthContext);
   const { id: carId } = useParams();
   const [car, setCar] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
+
+  const handleLike = async () => {
+    if (!isAuthenticated) return;
+
+    const carRef = doc(db, "cars", carId);
+    const carSnapshot = await getDoc(carRef);
+
+    if (carSnapshot.exists()) {
+      const carData = carSnapshot.data();
+      const userId = auth.currentUser.uid;
+
+      let updatedLikes = [...(carData.likes || [])];
+
+      if (liked) {
+        updatedLikes = updatedLikes.filter((id) => id !== userId);
+      } else {
+        updatedLikes.push(userId);
+      }
+
+      await updateDoc(carRef, {
+        likes: updatedLikes,
+      });
+
+      setCar((prevCar) => ({
+        ...prevCar,
+        likes: updatedLikes,
+      }));
+
+      setLiked(!liked);
+    }
+  };
 
   useEffect(() => {
     const fetchCarDetails = async () => {
@@ -25,12 +61,17 @@ export default function Details() {
         if (carSnapshot.exists()) {
           const carData = carSnapshot.data();
           setCar(carData);
+          console.log(carData.likes.length);
 
           onAuthStateChanged(auth, (user) => {
-            if (user && user.email === carData.owner) {
-              setIsOwner(true);
+            if (user && carData.likes && carData.likes.includes(user.uid)) {
+              setLiked(true); // Ако текущият потребител е харесал, поставяме `liked` на true
             }
           });
+
+          if (user && user.email === carData.owner) {
+            setIsOwner(true);
+          }
         } else {
           console.error("Car does not exist.");
         }
@@ -43,6 +84,33 @@ export default function Details() {
 
     fetchCarDetails();
   }, [carId, db, auth]);
+  // useEffect(() => {
+  //   const fetchCarDetails = async () => {
+  //     try {
+  //       const carDocRef = doc(db, "cars", carId);
+  //       const carSnapshot = await getDoc(carDocRef);
+
+  //       if (carSnapshot.exists()) {
+  //         const carData = carSnapshot.data();
+  //         setCar(carData);
+
+  //         onAuthStateChanged(auth, (user) => {
+  //           if (user && user.email === carData.owner) {
+  //             setIsOwner(true);
+  //           }
+  //         });
+  //       } else {
+  //         console.error("Car does not exist.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching car details:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchCarDetails();
+  // }, [carId, db, auth]);
 
   const handleEdit = () => {
     navigate(`/edit/${carId}`);
@@ -76,14 +144,6 @@ export default function Details() {
     }
   }, [carId]);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -93,23 +153,19 @@ export default function Details() {
   }
 
   return (
-    <div>
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <span className="loading loading-dots loading-lg custom-spinner"></span>
-        </div>
-      )}
-      <div className="p-4">
-        <div className="bg-white p-6">
-          <div className="flex flex-col gap-8 lg:gap-0 lg:flex-row justify-between">
+    <div className="p-4">
+      <div className="bg-white p-6">
+        <div className="flex flex-col gap-8 lg:gap-0 lg:flex-row justify-between">
+          <div className="max-w-2xl">
             <Carousel
               showArrows={true}
               showThumbs={false}
               dynamicHeight={false}
               autoPlay={false}
               infiniteLoop={true}
-              className="max-w-2xl max-h-96"
-              onClickItem={openModal}
+              selectedItem={selectedIndex}
+              onChange={(index) => setSelectedIndex(index)}
+              className="max-h-96"
             >
               {car.photos.map((photoUrl, index) => (
                 <div key={index}>
@@ -121,37 +177,57 @@ export default function Details() {
                 </div>
               ))}
             </Carousel>
-            <span className="lg:w-1/2 text-slate-600 flex lg:flex-row flex-col ">
-              <span className="w-1/2">
-                <h1 className="text-2xl font-bold ">
-                  {car.brand} {car.model}
-                </h1>
-                <p>Year: {car.year}</p>
-                <p>Power: {car.power} HP</p>
-                <p>Price: ${car.price}</p>
-                <p>Phone number: {car.phone}</p>
-                <p>Owner: {car.owner}</p>
-                <p>
-                  Features:
-                  <ul>
-                    {car.features.map((feature, index) => (
-                      <li key={index} className="list-disc ml-5">
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </p>
-              </span>
-              <span className="w-1/2 flex items-end flex-col">
-                <span>
-                  <p>Views: {car.views}</p>
-                </span>
-                {isOwner && (
-                  <div className="flex gap-5 mt-4 lg:flex-row flex-col w-full justify-end">
-                    <button className=" " onClick={handleEdit}>
+            <div className="flex gap-2 mt-4 overflow-x-auto">
+              {car.photos.map((photoUrl, index) => (
+                <img
+                  key={index}
+                  src={photoUrl}
+                  alt={`Thumbnail ${index + 1}`}
+                  className={`w-16 h-16 object-cover cursor-pointer border-2 rounded-md ${
+                    selectedIndex === index ? "border-blue-500" : "border-gray-300"
+                  }`}
+                  onClick={() => setSelectedIndex(index)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="lg:w-1/2 text-slate-600 flex justify-between">
+            <span>
+              <h1 className="text-2xl font-bold">
+                {car.brand} {car.model}
+              </h1>
+              <p>Year: {car.year}</p>
+              <p>Power: {car.power} HP</p>
+              <p>Price: ${car.price}</p>
+              <p>Engine: {car.fuelType}</p>
+              <p>Gearbox: {car.gearbox}</p>
+              <p>Phone number: {car.phone}</p>
+              <p>Owner: {car.owner}</p>
+              <p>Views: {car.views}</p>
+            </span>
+            <span>
+              <span className="flex justify-center items-center gap-2">
+                {isAuthenticated && (
+                  <button onClick={handleLike} className="hover:scale-105 duration-300">
+                    {liked ? (
+                      <span className="flex items-center gap-2">
+                        <p className="text-lg">{car.likes.length}</p>
+                        <FaHeart color="red" size={26} />
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <p className="text-lg">{car.likes.length}</p>
+                        <FaRegHeart color="red" size={26} />
+                      </span>
+                    )}
+                  </button>
+                )}
+                {isOwner && isAuthenticated && (
+                  <div className="flex gap-2">
+                    <button onClick={handleEdit}>
                       <PencilLine color="orange" />
                     </button>
-                    <button className="" onClick={setIsModalOpen(true)}>
+                    <button onClick={() => setIsModalOpen(true)}>
                       <Trash2 color="red" />
                     </button>
                   </div>
@@ -160,63 +236,6 @@ export default function Details() {
             </span>
           </div>
         </div>
-        {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Confirmation</h2>
-              <p>Are you sure you want to delete this car?</p>
-
-              <div className="flex justify-end mt-4 gap-2">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-300 px-4 py-2 rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    handleDelete();
-                    setIsModalOpen(false);
-                  }}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {isModalOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 "
-            onClick={closeModal}
-          >
-            <div
-              className=" p-4 rounded-lg max-w-2xl w-full max-h-[90%] flex justify-center items-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Carousel
-                showArrows={true}
-                showThumbs={false}
-                dynamicHeight={false}
-                autoPlay={false}
-                infiniteLoop={true}
-                onClick={closeModal}
-                className="w-full "
-              >
-                {car.photos.map((photoUrl, index) => (
-                  <div key={index} className="flex h-full items-center">
-                    <img
-                      src={photoUrl}
-                      alt={`Large car photo ${index + 1}`}
-                      className="object-contain max-h-[80vh]"
-                    />
-                  </div>
-                ))}
-              </Carousel>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

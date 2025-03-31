@@ -1,11 +1,14 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../Context/AuthContext";
 import { getAuth, signOut } from "firebase/auth";
+import { FaSignInAlt, FaUserAlt } from "react-icons/fa"; // Импортираме иконата
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // Състояние за управление на малкото меню
+  const menuRef = useRef(null); // Референция към малкото меню
   const { isAuthenticated } = useContext(AuthContext);
   const auth = getAuth();
 
@@ -13,7 +16,7 @@ export const Header = () => {
     e.preventDefault();
     try {
       await signOut(auth);
-      setIsOpen(false);
+      setMenuOpen(false); // Скриваме менюто след излизане
     } catch (error) {
       console.log(error);
     }
@@ -23,53 +26,79 @@ export const Header = () => {
     setIsOpen(false);
   }
 
+  // Закриваме менюто, ако потребителят кликне извън него
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false); // Скриваме менюто ако кликнем извън него
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <header className="bg-car-500 text-white p-3">
+    <header className="bg-primary text-white p-3">
       <div className="flex justify-between">
         <nav className="hidden md:flex space-x-3 flex justify-between w-full">
-          <h1 className="text-xl font-bold">CarDeals</h1>
-          <span className="flex justify-between space-x-3">
-            <Link to="/" className="hover:mt-0.5">
+          <Link to="/" className="text-3xl font-bold">
+            CarDeals
+          </Link>
+          <span className="flex justify-between space-x-3 items-center">
+            <Link to="/" className="hover:mt-0.5 text-xl">
               Home
             </Link>
-            <Link to="/about" className="hover:mt-0.5">
+            <Link to="/about" className="hover:mt-0.5 text-xl">
               About
             </Link>
-            <Link to="/catalog" className="hover:mt-0.5">
+            <Link to="/catalog" className="hover:mt-0.5 text-xl">
               Catalog
             </Link>
-            <Link to="/services" className="hover:mt-0.5">
+            <Link to="/services" className="hover:mt-0.5 text-xl">
               Services
             </Link>
-            <Link to="/contact" className="hover:mt-0.5">
+            <Link to="/contact" className="hover:mt-0.5 text-xl">
               Contact
             </Link>
             {isAuthenticated && (
-              <Link to="/add" className="hover:mt-0.5">
+              <Link
+                to="/add"
+                className=" text-xl bg-[#004D40] py-1 px-3 rounded-md hover:bg-[#0f3a34] transition duration-300"
+              >
                 Add car
               </Link>
             )}
           </span>
-          <span className="flex justify-between space-x-3">
+          <span className="flex justify-between space-x-3 justify-center items-center">
             {!isAuthenticated ? (
               <>
-                <Link to="/login" className="hover:mt-0.5">
+                <Link to="/login">
+                  <FaSignInAlt size={24} />
+                </Link>
+
+                {/* <Link to="/login" className="hover:mt-0.5 text-xl">
                   Login
                 </Link>
-                <Link to="/register" className="hover:mt-0.5">
+                <Link to="/register" className="hover:mt-0.5 text-xl">
                   Register
-                </Link>
+                </Link> */}
               </>
             ) : (
-              <button onClick={handleLogout} className="hover:mt-0.5">
-                Logout
+              <button
+                onClick={() => setMenuOpen(!menuOpen)} // Отваряме менюто при натискане
+                className="flex items-center text-xl"
+              >
+                <FaUserAlt />
               </button>
             )}
           </span>
         </nav>
 
         <span className="md:hidden p-1 flex justify-between items-center w-screen">
-          <h1 className="text-xl font-bold">AutoCar</h1>
+          <h1 className="text-xl font-bold">CarDeals</h1>
           <button className="md:hidden p-1 " onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -101,6 +130,7 @@ export const Header = () => {
 
           {!isAuthenticated ? (
             <>
+              {/* <FaSignInAlt /> */}
               <Link to="/login" className="hover:ml-2" onClick={closeMenu}>
                 Login
               </Link>
@@ -109,11 +139,35 @@ export const Header = () => {
               </Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="hover:ml-2">
-              Logout
-            </button>
+            <>
+              <Link to="/profile" className="hover:ml-2" onClick={closeMenu}>
+                My profile
+              </Link>
+              <button onClick={handleLogout} className="hover:ml-2">
+                Logout
+              </button>
+            </>
           )}
         </nav>
+      )}
+
+      {/* Малкото меню за профила */}
+      {menuOpen && isAuthenticated && (
+        <div
+          ref={menuRef} // Добавяме референция към менюто
+          className="absolute right-4 mt-2 bg-white text-black rounded-md shadow-lg p-3 flex flex-col z-20"
+        >
+          <Link
+            to="/profile"
+            onClick={() => setMenuOpen(false)}
+            className="hover:bg-gray-200 p-2 rounded"
+          >
+            My Profile
+          </Link>
+          <button onClick={handleLogout} className="hover:bg-gray-200 p-2 rounded">
+            Logout
+          </button>
+        </div>
       )}
     </header>
   );

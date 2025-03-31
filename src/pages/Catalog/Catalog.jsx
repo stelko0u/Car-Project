@@ -141,10 +141,8 @@ export default function Catalog() {
   const closeModal = () => setModalOpen(false);
 
   return (
-    <div className="p-8 w-full ">
-      <h1 className="text-2xl font-bold text-black">Catalog Page</h1>
-
-      <div className="flex gap-4 my-4 lg:flex-row flex-col">
+    <div className="p-8 w-full bg-[#222222]">
+      <div className="flex gap-4 my-3 lg:flex-row flex-col">
         <select
           onChange={handleBrandChange}
           value={filters.brand}
@@ -172,7 +170,7 @@ export default function Catalog() {
           ))}
         </select>
 
-        <button className="btn btn-primary" onClick={openModal}>
+        <button className="btn bg-[#168f7a] text-white" onClick={openModal}>
           Select Features
         </button>
       </div>
