@@ -48,5 +48,7 @@ export const getUserFriendlyMessage = (error) => {
       return "Stop spaming!!!!!";
     case FireBaseErrors.UserNotFound:
       return "Your email or password is incorrect!";
+    default:
+      return "Something went wrong. Please try again.";
   }
 };

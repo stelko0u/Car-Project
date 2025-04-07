@@ -33,7 +33,7 @@ export default function Footer() {
     <footer className="p-6 bg-zinc-900 text-white">
       <div className="container mx-auto text-center space-y-4">
         <div>
-          <h2 className="text-xl font-semibold">CarDeals</h2>
+          <h2 className="text-xl font-semibold">AutoCars</h2>
           <p className="text-base text-gray-400">The best car deals in one place.</p>
         </div>
 
@@ -56,7 +56,7 @@ export default function Footer() {
         </div>
 
         <div className="text-sm text-gray-400">
-          <p>© {year} CarDeals. All rights reserved.</p>
+          <p>© {year} AutoCars. All rights reserved.</p>
           <div className="flex justify-center space-x-4">
             <button onClick={openModalTerms} className="hover:underline">
               Terms & Conditions

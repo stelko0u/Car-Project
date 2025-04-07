@@ -3,8 +3,8 @@ import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../Context/AuthContext";
 import { getAuth, signOut } from "firebase/auth";
-import { FaSignInAlt, FaUserAlt } from "react-icons/fa"; // Импортираме иконата
-
+import { FaSignInAlt, FaUserAlt } from "react-icons/fa";
+import logo2 from "../../../public/logo2.png";
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // Състояние за управление на малкото меню
@@ -41,11 +41,11 @@ export const Header = () => {
   }, []);
 
   return (
-    <header className="bg-primary text-white p-3">
+    <header className="bg-primary text-white p-1">
       <div className="flex justify-between">
         <nav className="hidden md:flex space-x-3 flex justify-between w-full">
           <Link to="/" className="text-3xl font-bold">
-            CarDeals
+            <img src={logo2} alt="logo" className="w-16 h-16 scale-150 mx-5" />
           </Link>
           <span className="flex justify-between space-x-3 items-center">
             <Link to="/" className="hover:mt-0.5 text-xl">
@@ -88,7 +88,7 @@ export const Header = () => {
               </>
             ) : (
               <button
-                onClick={() => setMenuOpen(!menuOpen)} // Отваряме менюто при натискане
+                onClick={() => setMenuOpen(!menuOpen)} 
                 className="flex items-center text-xl"
               >
                 <FaUserAlt />
@@ -98,7 +98,7 @@ export const Header = () => {
         </nav>
 
         <span className="md:hidden p-1 flex justify-between items-center w-screen">
-          <h1 className="text-xl font-bold">CarDeals</h1>
+          <h1 className="text-xl font-bold">AutoCars</h1>
           <button className="md:hidden p-1 " onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

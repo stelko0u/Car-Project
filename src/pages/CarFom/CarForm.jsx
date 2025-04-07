@@ -19,14 +19,15 @@ function CarForm() {
     model: "",
     gearbox: "",
     color: "",
-    price: null,
+    price: 0,
     owner: "",
     fuelType: "",
-    power: null,
-    displacement: null,
-    odometer: null,
+    power: 0,
+    displacement: 0,
+    odometer: 0,
     phone: "",
-    views,
+    views: 0,
+    likes: [],
   });
   const [error, setError] = useState(null);
   const startYear = 1920;
@@ -44,11 +45,25 @@ function CarForm() {
     setEndYearOptions(filteredEndYears);
   };
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setCarInfo({
+  //     ...carInfo,
+  //     [name]: value,
+  //   });
+  // };
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Check if the field is a number, and convert it if necessary
+    const newValue =
+      name === "price" || name === "power" || name === "displacement" || name === "odometer"
+        ? parseFloat(value) || 0 // Convert to number, default to 0 if NaN
+        : value;
+
     setCarInfo({
       ...carInfo,
-      [name]: value,
+      [name]: newValue,
     });
   };
 
@@ -351,16 +366,16 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="power"
-              value={carInfo.power}
+              value={carInfo.power === 0 ? "" : carInfo.power}
               onChange={handleChange}
             />
             <input
               type="number"
               placeholder="Price ($)"
               className="input w-full bg-car-400 placeholder-black font-light text-black"
-              min="0"
+              min={0}
               name="price"
-              value={carInfo.price}
+              value={carInfo.price === 0 ? "" : carInfo.price}
               onChange={handleChange}
             />
             <input
@@ -369,7 +384,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="displacement"
-              value={carInfo.displacement}
+              value={carInfo.displacement === 0 ? "" : carInfo.displacement}
               onChange={handleChange}
             />
 
@@ -379,7 +394,7 @@ function CarForm() {
               className="input w-full bg-car-400 placeholder-black font-light text-black"
               min="0"
               name="odometer"
-              value={carInfo.odometer}
+              value={carInfo.odometer === 0 ? "" : carInfo.odometer}
               onChange={handleChange}
             />
 

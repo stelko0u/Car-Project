@@ -7,6 +7,9 @@ import { Carousel } from "react-responsive-carousel";
 import { Heart, HeartOff, PencilLine, Trash2 } from "lucide-react";
 import { AuthContext } from "../../Context/AuthContext";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 export default function Details() {
   const { isAuthenticated } = useContext(AuthContext);
@@ -15,8 +18,10 @@ export default function Details() {
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
   const [liked, setLiked] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [currentPhoto, setCurrentPhoto] = useState(null);
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
@@ -57,21 +62,19 @@ export default function Details() {
       try {
         const carDocRef = doc(db, "cars", carId);
         const carSnapshot = await getDoc(carDocRef);
-
+        const user = auth;
         if (carSnapshot.exists()) {
           const carData = carSnapshot.data();
           setCar(carData);
-          console.log(carData.likes.length);
 
-          onAuthStateChanged(auth, (user) => {
-            if (user && carData.likes && carData.likes.includes(user.uid)) {
-              setLiked(true); // Ако текущият потребител е харесал, поставяме `liked` на true
-            }
-          });
-
-          if (user && user.email === carData.owner) {
+          if (user && user.currentUser.email === carData.owner) {
             setIsOwner(true);
           }
+          onAuthStateChanged(auth, (user) => {
+            if (user && carData.likes && carData.likes.includes(user.uid)) {
+              setLiked(true);
+            }
+          });
         } else {
           console.error("Car does not exist.");
         }
@@ -84,33 +87,6 @@ export default function Details() {
 
     fetchCarDetails();
   }, [carId, db, auth]);
-  // useEffect(() => {
-  //   const fetchCarDetails = async () => {
-  //     try {
-  //       const carDocRef = doc(db, "cars", carId);
-  //       const carSnapshot = await getDoc(carDocRef);
-
-  //       if (carSnapshot.exists()) {
-  //         const carData = carSnapshot.data();
-  //         setCar(carData);
-
-  //         onAuthStateChanged(auth, (user) => {
-  //           if (user && user.email === carData.owner) {
-  //             setIsOwner(true);
-  //           }
-  //         });
-  //       } else {
-  //         console.error("Car does not exist.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching car details:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchCarDetails();
-  // }, [carId, db, auth]);
 
   const handleEdit = () => {
     navigate(`/edit/${carId}`);
@@ -118,6 +94,7 @@ export default function Details() {
 
   const handleDelete = async () => {
     try {
+      closeDeleteModal();
       const carDocRef = doc(db, "cars", carId);
       await deleteDoc(carDocRef);
       navigate("/catalog");
@@ -144,6 +121,24 @@ export default function Details() {
     }
   }, [carId]);
 
+  const openDeleteModal = (isOpen) => {
+    setIsOpenDeleteModal(isOpen);
+  };
+  const closeDeleteModal = () => {
+    setIsOpenDeleteModal(false);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCurrentPhoto(null);
+  };
+
+  const openModal = (photoUrl, index) => {
+    setCurrentPhoto(photoUrl);
+    setSelectedIndex(index);
+    setIsModalOpen(true);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -168,11 +163,12 @@ export default function Details() {
               className="max-h-96"
             >
               {car.photos.map((photoUrl, index) => (
-                <div key={index}>
+                <div key={index} onClick={() => openModal(photoUrl, index)}>
                   <img
                     src={photoUrl}
                     alt={`Car photo ${index + 1}`}
-                    className="object-cover size-full h-96"
+                    className="object-cover size-full h-96 cursor-pointer "
+                    onClick={() => openModal(photoUrl, index)}
                   />
                 </div>
               ))}
@@ -227,7 +223,7 @@ export default function Details() {
                     <button onClick={handleEdit}>
                       <PencilLine color="orange" />
                     </button>
-                    <button onClick={() => setIsModalOpen(true)}>
+                    <button onClick={() => openDeleteModal(true)}>
                       <Trash2 color="red" />
                     </button>
                   </div>
@@ -237,6 +233,64 @@ export default function Details() {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={isOpenDeleteModal}
+        onRequestClose={closeDeleteModal}
+        contentLabel="Delete Car Modal"
+        escapedClose={false}
+        className="rounded-lg shadow-lg max-w-full z-20 relative flex justify-center items-center"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-10"
+      >
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+          <h2 className="text-xl font-semibold">Are you sure you want to delete this car?</h2>
+          <div className="mt-4 flex justify-between">
+            <button
+              onClick={closeDeleteModal}
+              className="bg-green-500 text-white p-2 rounded-md hover:cursor-pointer px-12"
+            >
+              No
+            </button>
+            <button
+              onClick={() => handleDelete()}
+              className="bg-red-500 text-white p-2 rounded-md hover:cursor-pointer px-12"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Car Image Modal"
+        escapedClose={false}
+        // className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+        // overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        className="rounded-lg shadow-lg max-w-full z-20 relative flex justify-center items-center"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-10"
+      >
+        <div className="relative w-full max-w-4xl f">
+          <Carousel
+            selectedItem={selectedIndex}
+            onChange={(index) => setSelectedIndex(index)}
+            showArrows={true}
+            showThumbs={false}
+            infiniteLoop={true}
+            dynamicHeight={false}
+            autoPlay={false}
+          >
+            {car.photos.map((photoUrl, index) => (
+              <div key={index} className="flex justify-center items-center h-screen">
+                <img
+                  src={photoUrl}
+                  alt={`Car photo ${index + 1}`}
+                  className="object-cover max-h-screen w-full"
+                />
+              </div>
+            ))}
+          </Carousel>
+        </div>
+      </Modal>
     </div>
   );
 }

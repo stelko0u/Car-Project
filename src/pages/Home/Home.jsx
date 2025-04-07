@@ -17,7 +17,7 @@ export default function Home() {
     const fetchTopCars = async () => {
       try {
         const carsRef = collection(db, "cars");
-        const q = query(carsRef, orderBy("views", "desc"), limit(3));
+        const q = query(carsRef, orderBy("views", "desc"), limit(4));
         const querySnapshot = await getDocs(q);
 
         const carsList = querySnapshot.docs.map((doc) => ({

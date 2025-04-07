@@ -26,7 +26,7 @@ export default function CarBox({ car }) {
         onClick={() => navigate(`/details/${car.id}`)}
       >
         <span className="flex absolute bottom-1/3 right-2 bg-primary text-white px-2 py-1 rounded-md">
-          <p>{car.price} BGN</p>
+          <p>{car.price.toLocaleString()} $</p>
         </span>
         <img
           src={car.photos?.[0] || "placeholder.jpg"}
@@ -36,7 +36,7 @@ export default function CarBox({ car }) {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom_left,rgba(30,30,30,1)_0%,rgba(30,30,30,0)_15%,rgba(30,30,30,0)_100%)]"></div>
 
         <span className="flex absolute top-2 right-2 text-white gap-1">
-          <Eye /> {car.views}
+          <Eye /> {car.views.toLocaleString()}
         </span>
 
         <span className="px-4 flex flex-col">
@@ -45,7 +45,7 @@ export default function CarBox({ car }) {
           </h3>
           <p>Year: {car.year}</p>
           <p>Engine: {car.fuelType}</p>
-          <p>Odometer: {car.odometer} km</p>
+          <p>Odometer: {car.odometer.toLocaleString()} km</p>
           <p>Gearbox: {car.gearbox.charAt(0).toUpperCase() + car.gearbox.slice(1)}</p>
         </span>
       </div>

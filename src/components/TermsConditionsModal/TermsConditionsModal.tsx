@@ -11,10 +11,10 @@ export default function TermsAndConditionsModal({ isOpen, onClose }) {
       onRequestClose={onClose}
       contentLabel="Terms and Conditions"
       shouldCloseOnOverlayClick={true}
-      className="fixed inset-0 flex justify-center items-center bg-zinc-800 bg-opacity-75 backdrop-blur-sm "
-      overlayClassName="fixed inset-0 bg-opacity-75 backdrop-blur-sm"
+      className="bg-primary p-6 rounded-lg shadow-lg max-w-lg w-full z-20 relative"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-md flex justify-center items-center z-10"
     >
-      <div className="bg-primary p-6 rounded-lg shadow-lg max-w-lg w-full">
+      <div>
         <h2 className="text-xl font-semibold">Terms and Conditions</h2>
         <div className="mt-4 max-h-96 overflow-y-auto">
           <p>
