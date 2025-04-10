@@ -15,11 +15,6 @@ const Register = () => {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
     createUserWithEmailAndPassword(auth, email, password)
       .then((user) => {
         console.log(user);
@@ -29,6 +24,16 @@ const Register = () => {
         const errorMessage = getUserFriendlyMessage(error.code);
         setError(errorMessage);
       });
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
   }
 
   return (
