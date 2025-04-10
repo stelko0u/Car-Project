@@ -72,7 +72,7 @@ export const Header = () => {
               </Link>
             )}
           </span>
-          <span className="flex justify-between space-x-3 justify-center items-center">
+          <span className="flex justify-between space-x-5 items-center pr-2 ">
             {!isAuthenticated ? (
               <>
                 <Link to="/login">
@@ -87,10 +87,7 @@ export const Header = () => {
                 </Link> */}
               </>
             ) : (
-              <button
-                onClick={() => setMenuOpen(!menuOpen)} 
-                className="flex items-center text-xl"
-              >
+              <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center text-xl mr-2">
                 <FaUserAlt />
               </button>
             )}

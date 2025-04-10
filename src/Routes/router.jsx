@@ -15,6 +15,8 @@ import OwnerGuard from "./OwnerGuard.jsx";
 import Footer from "../components/Footer/Footer.jsx";
 import NotFound from "../pages/NotFound/NotFound.jsx";
 import Profile from "../pages/Profile/Profile.js";
+import FAQ from "../pages/FAQ/faq.jsx";
+import Contacts from "../pages/Contacts/Contacts.jsx";
 
 export const Layout = () => {
   const outletStyle = {
@@ -57,6 +59,9 @@ export const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/about", element: <About /> },
       { path: "/catalog", element: <Catalog /> },
+      { path: "/faq", element: <FAQ /> },
+      { path: "/contact", element: <Contacts /> },
+
       {
         path: "/add",
         element: (
