@@ -17,6 +17,7 @@ import NotFound from "../pages/NotFound/NotFound.jsx";
 import Profile from "../pages/Profile/Profile.js";
 import FAQ from "../pages/FAQ/faq.jsx";
 import Contacts from "../pages/Contacts/Contacts.jsx";
+import ResetPassword from "../pages/ResetPassword/ResetPassword.jsx";
 
 export const Layout = () => {
   const outletStyle = {
@@ -61,6 +62,7 @@ export const router = createBrowserRouter([
       { path: "/catalog", element: <Catalog /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/contact", element: <Contacts /> },
+      { path: "/reset-password", element: <ResetPassword /> },
 
       {
         path: "/add",

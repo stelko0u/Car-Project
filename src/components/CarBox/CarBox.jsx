@@ -26,7 +26,7 @@ export default function CarBox({ car }) {
         onClick={() => navigate(`/details/${car.id}`)}
       >
         <span className="flex absolute bottom-1/3 right-2 bg-primary text-white px-2 py-1 rounded-md">
-          <p>{car.price.toLocaleString()} $</p>
+          <p>$ {car.price.toLocaleString()}</p>
         </span>
         <img
           src={car.photos?.[0] || "placeholder.jpg"}

@@ -35,7 +35,9 @@ export const FireBaseErrors = {
   UserNotFound: "auth/user-not-found",
 };
 export const getUserFriendlyMessage = (error) => {
-  switch (error) {
+  const errorCode = error?.code;
+
+  switch (errorCode) {
     case FireBaseErrors.EmailAlreadyUse:
       return "The email you've selected is already in use!";
     case FireBaseErrors.InvalidEmail:
@@ -45,7 +47,7 @@ export const getUserFriendlyMessage = (error) => {
     case FireBaseErrors.WrongPassword:
       return "Your email or password is incorrect!";
     case FireBaseErrors.TooManyRequests:
-      return "Stop spaming!!!!!";
+      return "Stop spamming!";
     case FireBaseErrors.UserNotFound:
       return "Your email or password is incorrect!";
     default:
