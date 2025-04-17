@@ -23,6 +23,10 @@ const Login = () => {
         const errorMessage = getUserFriendlyMessage(error.code);
         setError(errorMessage);
       });
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
   }
   return (
     <div
@@ -60,6 +64,12 @@ const Login = () => {
             I don't have an account?{" "}
             <Link to="/register" className="text-blue-500 font-bold">
               Register
+            </Link>
+          </p>
+          <p className="text-center text-l">
+            Forgot password? {" "}
+            <Link to="/reset-password" className="text-blue-500 font-bold">
+              Reset Password
             </Link>
           </p>
           <input
