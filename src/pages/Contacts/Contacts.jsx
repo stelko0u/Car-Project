@@ -228,7 +228,7 @@ export default function Contacts() {
       </div>
       {isSuccess && (
         <div className="fixed top-4 left-4 bg-green-500 text-white py-2 px-4 rounded-md shadow-md z-50">
-          Your suggestion sent successful!
+          Your suggestion was sent successfully!
         </div>
       )}
     </div>
