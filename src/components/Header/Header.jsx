@@ -7,8 +7,8 @@ import { FaSignInAlt, FaUserAlt } from "react-icons/fa";
 import logo2 from "../../../public/logo2.png";
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // Състояние за управление на малкото меню
-  const menuRef = useRef(null); // Референция към малкото меню
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const { isAuthenticated } = useContext(AuthContext);
   const auth = getAuth();
 
@@ -16,7 +16,7 @@ export const Header = () => {
     e.preventDefault();
     try {
       await signOut(auth);
-      setMenuOpen(false); // Скриваме менюто след излизане
+      setMenuOpen(false);
     } catch (error) {
       console.log(error);
     }
@@ -26,11 +26,10 @@ export const Header = () => {
     setIsOpen(false);
   }
 
-  // Закриваме менюто, ако потребителят кликне извън него
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false); // Скриваме менюто ако кликнем извън него
+        setMenuOpen(false);
       }
     };
 
@@ -57,8 +56,8 @@ export const Header = () => {
             <Link to="/catalog" className="hover:mt-0.5 text-xl">
               Catalog
             </Link>
-            <Link to="/services" className="hover:mt-0.5 text-xl">
-              Services
+            <Link to="/faq" className="hover:mt-0.5 text-xl">
+              Help
             </Link>
             <Link to="/contact" className="hover:mt-0.5 text-xl">
               Contact
@@ -79,12 +78,6 @@ export const Header = () => {
                   <FaSignInAlt size={24} />
                 </Link>
 
-                {/* <Link to="/login" className="hover:mt-0.5 text-xl">
-                  Login
-                </Link>
-                <Link to="/register" className="hover:mt-0.5 text-xl">
-                  Register
-                </Link> */}
               </>
             ) : (
               <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center text-xl mr-2">
@@ -127,7 +120,6 @@ export const Header = () => {
 
           {!isAuthenticated ? (
             <>
-              {/* <FaSignInAlt /> */}
               <Link to="/login" className="hover:ml-2" onClick={closeMenu}>
                 Login
               </Link>
@@ -148,10 +140,10 @@ export const Header = () => {
         </nav>
       )}
 
-      {/* Малкото меню за профила */}
+      
       {menuOpen && isAuthenticated && (
         <div
-          ref={menuRef} // Добавяме референция към менюто
+          ref={menuRef}
           className="absolute right-4 mt-2 bg-white text-black rounded-md shadow-lg p-3 flex flex-col z-20"
         >
           <Link
