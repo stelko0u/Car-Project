@@ -12,6 +12,8 @@
   "dependencies": {
     "@firebase/database": "^1.0.12",
     "@firebase/storage": "^0.13.6",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.0.8",
