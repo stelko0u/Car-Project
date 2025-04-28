@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import CarBox from "../../components/CarBox/CarBox";
 
@@ -8,8 +8,15 @@ export default function Catalog() {
     brand: "",
     model: "",
     features: [],
+    minPrice: '',
+    maxPrice: '',
   });
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isPriceDropdownOpen, setPriceDropdownOpen] = useState(false);
+
+  const priceDropdownRef = useRef(null);
+  const priceButtonRef = useRef(null);
+
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -24,6 +31,7 @@ export default function Catalog() {
         }));
 
         setCars(carsList);
+
       } catch (error) {
         console.error("Error fetching cars data:", error);
       }
@@ -32,6 +40,28 @@ export default function Catalog() {
     fetchCars();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        priceDropdownRef.current &&
+        !priceDropdownRef.current.contains(event.target) &&
+        priceButtonRef.current &&
+        !priceButtonRef.current.contains(event.target)
+      ) {
+        setPriceDropdownOpen(false);
+      }
+    };
+
+    if (isPriceDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPriceDropdownOpen]);
+
+
   const filteredCars = cars.filter((car) => {
     const matchesBrand = filters.brand ? car.brand === filters.brand : true;
     const matchesModel = filters.model ? car.model === filters.model : true;
@@ -39,7 +69,15 @@ export default function Catalog() {
       ? filters.features.every((feature) => car.features.includes(feature))
       : true;
 
-    return matchesBrand && matchesModel && matchesFeatures;
+    const carPrice = typeof car.price === 'number' ? car.price : parseFloat(car.price);
+
+    const minPriceFilter = filters.minPrice === '' ? null : parseFloat(filters.minPrice);
+    const maxPriceFilter = filters.maxPrice === '' ? null : parseFloat(filters.maxPrice);
+
+    const matchesMinPrice = minPriceFilter === null || (!isNaN(minPriceFilter) && carPrice >= minPriceFilter);
+    const matchesMaxPrice = maxPriceFilter === null || (!isNaN(maxPriceFilter) && carPrice <= maxPriceFilter);
+
+    return matchesBrand && matchesModel && matchesFeatures && matchesMinPrice && matchesMaxPrice;
   });
 
   const handleBrandChange = (event) => {
@@ -66,23 +104,38 @@ export default function Catalog() {
     });
   };
 
+  const handleMinPriceChange = (event) => {
+      const value = event.target.value;
+      const numberValue = parseInt(value, 10);
+
+      const nonNegativeValue = value === '' ? '' : (isNaN(numberValue) ? value : Math.max(0, numberValue));
+
+      setFilters(prevFilters => ({
+         ...prevFilters,
+         minPrice: nonNegativeValue,
+      }));
+  };
+
+  const handleMaxPriceChange = (event) => {
+       const value = event.target.value;
+       const numberValue = parseInt(value, 10);
+
+       const nonNegativeValue = value === '' ? '' : (isNaN(numberValue) ? value : Math.max(0, numberValue));
+
+       setFilters(prevFilters => ({
+          ...prevFilters,
+          maxPrice: nonNegativeValue,
+       }));
+  };
+
+  const togglePriceDropdown = () => {
+      setPriceDropdownOpen(!isPriceDropdownOpen);
+  };
+
   const carData = {
     Audi: [
-      "80",
-      "90",
-      "100",
-      "А1",
-      "А2",
-      "A3",
-      "A4",
-      "A5",
-      "A6",
-      "A7",
-      "A8",
-      "Q3",
-      "Q5",
-      "Q7",
-      "Q8",
+      "80", "90", "100", "А1", "А2", "A3", "A4", "A5", "A6", "A7", "A8",
+      "Q3", "Q5", "Q7", "Q8",
     ],
     BMW: ["X5", "320i", "M3", "M5", "X3", "X6", "X7", "X1", "X2", "X4"],
     Mercedes: ["C-Class", "E-Class", "GLA", "GLC", "GLE", "GLS", "S-Class"],
@@ -107,34 +160,14 @@ export default function Catalog() {
   };
 
   const featuresList = [
-    "Air Conditioning",
-    "Leather Seats",
-    "Navigation System",
-    "Bluetooth",
-    "Rear Camera",
-    "Cruise Control",
-    "Heated Seats",
-    "Panoramic Roof",
-    "Alarm System",
-    "Parking Sensors",
-    "Adaptive Headlights",
-    "Keyless Entry",
-    "Adaptive Cruise Control",
-    "Automatic Traffic Sign Recognition",
-    "LED Lights",
-    "Blind Spot Monitoring System",
-    "Automatic Transmission",
-    "Electric Seats",
-    "Traction Control",
-    "Stability Control (ESP)",
-    "Electric Windows",
-    "Electric Mirrors",
-    "On-board Computer",
-    "Sunroof",
-    "Multifunction Steering Wheel",
-    "4x4 Drive",
-    "Automatic Climate Control",
-    "Tuning",
+    "Air Conditioning", "Leather Seats", "Navigation System", "Bluetooth",
+    "Rear Camera", "Cruise Control", "Heated Seats", "Panoramic Roof",
+    "Alarm System", "Parking Sensors", "Adaptive Headlights", "Keyless Entry",
+    "Adaptive Cruise Control", "Automatic Traffic Sign Recognition", "LED Lights",
+    "Blind Spot Monitoring System", "Automatic Transmission", "Electric Seats",
+    "Traction Control", "Stability Control (ESP)", "Electric Windows",
+    "Electric Mirrors", "On-board Computer", "Sunroof", "Multifunction Steering Wheel",
+    "4x4 Drive", "Automatic Climate Control", "Tuning",
   ];
 
   const openModal = () => setModalOpen(true);
@@ -142,11 +175,11 @@ export default function Catalog() {
 
   return (
     <div className="p-8 w-full bg-[#222222]">
-      <div className="flex gap-4 my-3 lg:flex-row flex-col">
+      <div className="flex flex-wrap gap-4 my-3 items-center">
         <select
           onChange={handleBrandChange}
           value={filters.brand}
-          className="select select-bordered"
+          className="select select-bordered min-w-[150px] max-w-[200px]"
         >
           <option value="">All Brands</option>
           {Object.keys(carData).map((brand) => (
@@ -160,7 +193,7 @@ export default function Catalog() {
           onChange={handleModelChange}
           value={filters.model}
           disabled={!filters.brand}
-          className="select select-bordered"
+          className="select select-bordered min-w-[150px] max-w-[200px]"
         >
           <option value="">All Models</option>
           {(carData[filters.brand] || []).map((model) => (
@@ -170,32 +203,74 @@ export default function Catalog() {
           ))}
         </select>
 
-        <button className="btn bg-[#168f7a] text-white" onClick={openModal}>
+        <button
+            className="btn bg-[#168f7a] text-white w-40"
+            onClick={openModal}
+        >
           Select Features
         </button>
+
+        <div className="relative w-40">
+             <button
+                ref={priceButtonRef}
+                className="btn bg-gray-700 text-white w-full"
+                onClick={togglePriceDropdown}
+             >
+                Search by Price
+             </button>
+
+             {isPriceDropdownOpen && (
+                 <div
+                     ref={priceDropdownRef}
+                     className="absolute top-full left-0 mt-2 p-4 bg-gray-800 rounded-md shadow-lg z-20 flex flex-col gap-2 min-w-[200px]"
+                     onClick={(e) => e.stopPropagation()}
+                 >
+                     <label className="text-sm text-gray-300">Lowest End:</label>
+                     <input
+                        type="number"
+                        placeholder="Min"
+                        value={filters.minPrice}
+                        onChange={handleMinPriceChange}
+                        min="0"
+                        className="input input-bordered w-full input-sm"
+                     />
+
+                    <label className="text-sm text-gray-300">Highest End:</label>
+                     <input
+                        type="number"
+                        placeholder="Max"
+                        value={filters.maxPrice}
+                        onChange={handleMaxPriceChange}
+                        min="0"
+                        className="input input-bordered w-full input-sm"
+                     />
+                 </div>
+             )}
+        </div>
+
       </div>
 
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 "
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={closeModal}
         >
           <div
-            className="bg-white p-6 rounded-lg shadow-lg relative w-4/5 h-2/3"
+            className="bg-white p-6 rounded-lg shadow-lg relative w-4/5 h-2/3 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="flex  justify-between mb-4 items-center">
-              <h2 className="text-xl font-bold mb-4 text-slate-600">Select Features</h2>
+            <span className="flex justify-between mb-4 items-center flex-shrink-0">
+              <h2 className="text-xl font-bold text-slate-600">Select Features</h2>
               <button
-                className="p-2 bg-car-500 text-white px-4 py-1 rounded-md"
+                className="p-2 bg-[#168f7a] text-white px-4 py-1 rounded-md"
                 onClick={closeModal}
               >
                 Close
               </button>
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow">
               {featuresList.map((feature) => (
-                <label key={feature} className="flex items-center">
+                <label key={feature} className="flex items-center text-gray-700">
                   <input
                     type="checkbox"
                     checked={filters.features.includes(feature)}
@@ -214,6 +289,11 @@ export default function Catalog() {
         {filteredCars.map((car) => (
           <CarBox key={car.id} car={car} />
         ))}
+         {filteredCars.length === 0 && (
+            <div className="col-span-full text-center text-white text-xl">
+                No cars match your filters.
+            </div>
+        )}
       </div>
     </div>
   );
