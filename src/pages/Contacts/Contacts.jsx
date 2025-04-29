@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapMarkerAlt, faPhone, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 export default function Contacts() {
   const [name, setName] = useState("");
@@ -11,7 +12,7 @@ export default function Contacts() {
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneEmptyError, setPhoneEmptyError] = useState("");
-  const [phoneLengthError, setPhoneLengthError] = useState(""); 
+  const [phoneLengthError, setPhoneLengthError] = useState("");
   const [messageError, setMessageError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -22,39 +23,50 @@ export default function Contacts() {
     message: false,
   });
 
-  
   const maxPhoneLength = 15;
+  const db = getFirestore();
 
   useEffect(() => {
-    const numericPhoneLength = phone.replace(/[^0-9]/g, '').length;
+    const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
     const isNameValid = name.trim() !== "";
     const isEmailValid = email.trim() !== "";
     const isPhoneEmpty = phone.trim() === "";
     const isPhoneValidLength = numericPhoneLength >= 10;
     const isMessageValid = message.trim() !== "";
 
-    setNameError((touched.name && !isNameValid) ? "Please enter your name." : "");
-    setEmailError((touched.email && !isEmailValid) ? "Please enter your email address." : "");
-    setPhoneEmptyError((touched.phone && isPhoneEmpty) ? "Please enter your phone number." : "");
-    setPhoneLengthError((touched.phone && !isPhoneEmpty && !isPhoneValidLength) ? "A phone number must be at least 10 digits." : "");
-    setMessageError((touched.message && !isMessageValid) ? "Please enter your message." : "");
+    setNameError(touched.name && !isNameValid ? "Please enter your name." : "");
+    setEmailError(touched.email && !isEmailValid ? "Please enter your email address." : "");
+    setPhoneEmptyError(touched.phone && isPhoneEmpty ? "Please enter your phone number." : "");
+    setPhoneLengthError(
+      touched.phone && !isPhoneEmpty && !isPhoneValidLength
+        ? "A phone number must be at least 10 digits."
+        : ""
+    );
+    setMessageError(touched.message && !isMessageValid ? "Please enter your message." : "");
 
-    setCanSubmit(isNameValid && isEmailValid && !isPhoneEmpty && isPhoneValidLength && isMessageValid && agreement);
+    setCanSubmit(
+      isNameValid &&
+        isEmailValid &&
+        !isPhoneEmpty &&
+        isPhoneValidLength &&
+        isMessageValid &&
+        agreement
+    );
   }, [name, email, phone, message, agreement, touched]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     switch (name) {
-      case 'name':
+      case "name":
         setName(value);
         break;
-      case 'email':
+      case "email":
         setEmail(value);
         break;
-      case 'phone':
-        setPhone(value.replace(/[^0-9]/g, ''));
+      case "phone":
+        setPhone(value.replace(/[^0-9]/g, ""));
         break;
-      case 'message':
+      case "message":
         setMessage(value);
         break;
       default:
@@ -64,37 +76,55 @@ export default function Contacts() {
 
   const handleBlur = (e) => {
     const { name } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleAgreementChange = (e) => {
     setAgreement(e.target.checked);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const numericPhoneLength = phone.replace(/[^0-9]/g, '').length;
+    const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
     const isNameValid = name.trim() !== "";
     const isEmailValid = email.trim() !== "";
     const isPhoneEmpty = phone.trim() === "";
     const isPhoneValidLength = numericPhoneLength >= 10;
     const isMessageValid = message.trim() !== "";
 
-    if (isNameValid && isEmailValid && !isPhoneEmpty && isPhoneValidLength && isMessageValid && agreement) {
-      console.log("The form was sent:", { name, email, phone, message, agreement });
-      setIsSuccess(true);
-      setTimeout(() => {
-        setIsSuccess(false);
-      }, 3000);
-      setName("");
-      setEmail("");
-      setPhone("");
-      setMessage("");
-      setAgreement(false);
-      setTouched({ name: false, email: false, phone: false, message: false });
+    if (
+      isNameValid &&
+      isEmailValid &&
+      !isPhoneEmpty &&
+      isPhoneValidLength &&
+      isMessageValid &&
+      agreement
+    ) {
+      try {
+        await addDoc(collection(db, "contacts"), {
+          name,
+          email,
+          phone,
+          message,
+          agreement,
+          createdAt: new Date(),
+        });
+
+        console.log("The form was sent:", { name, email, phone, message, agreement });
+        setIsSuccess(true);
+        setTimeout(() => setIsSuccess(false), 3000);
+        setName("");
+        setEmail("");
+        setPhone("");
+        setMessage("");
+        setAgreement(false);
+        setTouched({ name: false, email: false, phone: false, message: false });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+      }
     } else {
       setTouched({ name: true, email: true, phone: true, message: true });
-      if (phone.trim() === "") setPhoneEmptyError("Please enter your phone number.");
+      if (isPhoneEmpty) setPhoneEmptyError("Please enter your phone number.");
       if (!isPhoneEmpty && !isPhoneValidLength) {
         setPhoneLengthError("A phone number must be at least 10 digits.");
       }
@@ -118,10 +148,12 @@ export default function Contacts() {
                 name="name"
                 id="name"
                 autoComplete="name"
-                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${nameError && 'border-red-500'}`}
+                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
+                  nameError && "border-red-500"
+                }`}
                 placeholder=""
                 value={name}
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
                 onBlur={handleBlur}
               />
               {nameError && <p className="text-red-500 text-xs italic">{nameError}</p>}
@@ -136,7 +168,9 @@ export default function Contacts() {
                 name="email"
                 id="email"
                 autoComplete="email"
-                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${emailError && 'border-red-500'}`}
+                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
+                  emailError && "border-red-500"
+                }`}
                 placeholder=""
                 value={email}
                 onChange={handleInputChange}
@@ -154,15 +188,19 @@ export default function Contacts() {
                 name="phone"
                 id="phone"
                 autoComplete="tel"
-                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${(phoneEmptyError || phoneLengthError) && 'border-red-500'}`}
+                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
+                  (phoneEmptyError || phoneLengthError) && "border-red-500"
+                }`}
                 placeholder=""
                 value={phone}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                maxLength={maxPhoneLength} 
+                maxLength={maxPhoneLength}
               />
               {phoneEmptyError && <p className="text-red-500 text-xs italic">{phoneEmptyError}</p>}
-              {phoneLengthError && <p className="text-red-500 text-xs italic">{phoneLengthError}</p>}
+              {phoneLengthError && (
+                <p className="text-red-500 text-xs italic">{phoneLengthError}</p>
+              )}
             </div>
 
             <div>
@@ -173,7 +211,9 @@ export default function Contacts() {
                 id="message"
                 name="message"
                 rows={3}
-                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${messageError && 'border-red-500'}`}
+                className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
+                  messageError && "border-red-500"
+                }`}
                 placeholder=""
                 value={message}
                 onChange={handleInputChange}
@@ -199,10 +239,17 @@ export default function Contacts() {
             <div>
               <button
                 type="submit"
-                className={`flex w-full justify-center items-center rounded-md bg-[#146C5F] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#10594F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#146C5F] ${!canSubmit && 'opacity-50 cursor-not-allowed'}`}
+                className={`flex w-full justify-center items-center rounded-md bg-[#146C5F] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#10594F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#146C5F] ${
+                  !canSubmit && "opacity-50 cursor-not-allowed"
+                }`}
                 disabled={!canSubmit}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 transform -rotate-45" viewBox="0 0 20 20" fill="currentColor">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2 transform -rotate-45"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
                   <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 16.571V11a1 1 0 112 0v5.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                 </svg>
                 Send
