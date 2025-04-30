@@ -50,10 +50,10 @@ export default function About() {
           <div>
             <h2 className="text-3xl font-bold mb-6 text-[#168f7a]">Our Story</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-              Founded in 2025, our dealership started with a simple vision: to provide a better way to buy and sell cars. We began as a small team of automotive enthusiasts who believed in putting the customer first. Over the years, we've grown, but our core principles remain the same.
+              This website is a project created by three students as part of our university coursework. We embarked on this journey to deepen our understanding of web development and apply our skills in a practical way.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              From our humble beginnings to becoming a trusted name in the industry, every step of our journey has been driven by a commitment to quality, integrity, and a genuine love for cars.
+              Driven by a shared interest in both technology and the automotive world, we aimed to build a platform that showcases our learning while exploring the features of a modern car sales website. It represents our dedication to learning and our first steps into creating real-world applications.
             </p>
           </div>
         </div>
@@ -101,8 +101,8 @@ export default function About() {
             <p className="text-gray-300 mb-8">
               Explore our extensive catalog or
                <a href="/contact" className="text-[#168f7a] hover:underline ml-1">
-                contact us today</a> to learn more.
-              </p>
+                contact us today</a>  to learn more.
+             </p>
             <a href="/catalog" className="btn bg-[#168f7a] text-white text-lg px-8 py-3 rounded-md hover:bg-[#137a69] transition duration-300">
               View Catalog
             </a>
