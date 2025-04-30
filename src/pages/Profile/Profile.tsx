@@ -5,19 +5,17 @@ import { AuthContext } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CarBox from "../../components/CarBox/CarBox";
 
-// Define the type for the car object
 interface Car {
   id: string;
-  // Add other properties that the car object might have, for example:
   make: string;
   model: string;
   year: number;
-  likes: string[]; // Assuming likes is an array of userIds
+  likes: string[];
 }
 
 export default function Profile() {
   const { isAuthenticated } = useContext(AuthContext);
-  const [likedCars, setLikedCars] = useState<Car[]>([]); // Specify the type here
+  const [likedCars, setLikedCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
   const db = getFirestore();
@@ -38,7 +36,7 @@ export default function Profile() {
         const cars: Car[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })) as Car[]; // Cast the data to the Car type
+        })) as Car[];
         setLikedCars(cars);
       } catch (error) {
         console.error("Error fetching liked cars:", error);
@@ -70,7 +68,13 @@ export default function Profile() {
     <div className="p-4">
       {auth.currentUser?.email === "admin@admin.com" && (
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4">You are Admin! </h1>
+          <button
+            onClick={() => navigate("/admin")}
+            style={{ backgroundColor: "rgb(22, 143, 122)" }}
+            className="text-white px-4 py-2 rounded hover:opacity-90 transition"
+          >
+            Go to Admin Page
+          </button>
         </div>
       )}
       <h1 className="text-2xl font-bold mb-4">Your Liked Cars</h1>

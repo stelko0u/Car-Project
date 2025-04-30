@@ -17,6 +17,7 @@ import NotFound from "../pages/NotFound/NotFound.jsx";
 import Profile from "../pages/Profile/Profile.js";
 import FAQ from "../pages/FAQ/faq.jsx";
 import Contacts from "../pages/Contacts/Contacts.jsx";
+import AdminPage from "../pages/Admin/Admin.jsx"; 
 import ResetPassword from "../pages/ResetPassword/ResetPassword.jsx";
 
 export const Layout = () => {
@@ -86,6 +87,14 @@ export const router = createBrowserRouter([
           <OwnerGuard>
             <EditForm />
           </OwnerGuard>
+        ),
+      },
+      {
+        path: "/admin",
+        element: (
+          <Protected>
+            <AdminPage />
+          </Protected>
         ),
       },
       { path: "*", element: <NotFound /> },
