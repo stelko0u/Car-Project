@@ -11,13 +11,14 @@ import bg from "../../public/bg.jpg";
 import Details from "../pages/Details/Details.jsx";
 import EditForm from "../pages/EditForm/EditForm.jsx";
 import { Protected } from "./Protected.jsx";
+import { AdminGuard } from "./AdminGuard.jsx";
 import OwnerGuard from "./OwnerGuard.jsx";
 import Footer from "../components/Footer/Footer.jsx";
 import NotFound from "../pages/NotFound/NotFound.jsx";
 import Profile from "../pages/Profile/Profile.js";
 import FAQ from "../pages/FAQ/faq.jsx";
 import Contacts from "../pages/Contacts/Contacts.jsx";
-import AdminPage from "../pages/Admin/Admin.jsx"; 
+import AdminPage from "../pages/Admin/Admin.jsx";
 import ResetPassword from "../pages/ResetPassword/ResetPassword.jsx";
 
 export const Layout = () => {
@@ -92,9 +93,9 @@ export const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <Protected>
+          <AdminGuard>
             <AdminPage />
-          </Protected>
+          </AdminGuard>
         ),
       },
       { path: "*", element: <NotFound /> },
