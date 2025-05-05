@@ -4,7 +4,7 @@ import ab2 from "../../../public/cars_slowdrive.mp4";
 
 export default function About() {
   return (
-    <div className="bg-[#1a1a1a] text-white min-h-screen">
+    <div className="bg-[#1a1a1a] text-white min-h-screen z-0">
 
       <div className="relative h-96">
          <video
@@ -12,7 +12,7 @@ export default function About() {
            loop
            muted
            playsInline
-           className="absolute inset-0 w-full h-full object-cover z-0"
+           className="absolute inset-0 w-full h-full object-cover"
          >
            <source src={ab2} type="video/mp4" />
            Your browser does not support the video tag.
