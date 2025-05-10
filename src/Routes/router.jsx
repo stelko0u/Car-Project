@@ -23,7 +23,6 @@ import ResetPassword from "../pages/ResetPassword/ResetPassword.jsx";
 
 export const Layout = () => {
   const outletStyle = {
-    // backgroundColor: "#1E1E1E", // dark background color
     backgroundSize: "cover",
     backgroundPosition: "center",
     minHeight: "calc(100vh - 100px)",
