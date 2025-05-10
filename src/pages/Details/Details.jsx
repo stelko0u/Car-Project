@@ -264,8 +264,7 @@ export default function Details() {
         onRequestClose={closeModal}
         contentLabel="Car Image Modal"
         escapedClose={false}
-        // className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        // overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        
         className="rounded-lg shadow-lg max-w-full z-20 relative flex justify-center items-center"
         overlayClassName="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-10"
       >

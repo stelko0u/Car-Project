@@ -85,14 +85,14 @@ const AdminPage = () => {
 
     const renderContent = () => {
         if (loading) {
-            return <div className="text-white text-center mt-8">Loading data...</div>; 
+            return <div className="text-white text-center mt-8">Loading data...</div>;
         }
         if (error) {
             return <div className="text-red-400 text-center mt-8">Error loading data: {error.message}</div>;
         }
 
         if (currentView === 'cars') {
-             if (cars.length > 0) {
+            if (cars.length > 0) {
                 return (
                     <div>
                         <h2 className="text-xl font-semibold mb-4 text-white">Car Offers</h2>
@@ -122,7 +122,7 @@ const AdminPage = () => {
             } else { return <div className="text-white text-center mt-8">No car offers found.</div>; }
 
         } else if (currentView === 'messages') {
-             if (messages.length > 0) {
+            if (messages.length > 0) {
                 return (
                     <div>
                         <h2 className="text-xl font-semibold mb-4 text-white">Messages</h2>
@@ -184,7 +184,6 @@ const AdminPage = () => {
                 <nav className="space-y-2 flex-grow">
                     <button className={`block w-full text-left p-2 rounded transition-colors duration-200 ${currentView === 'cars' ? 'bg-gray-700' : 'hover:bg-gray-700'}`} onClick={handleCarsClick} disabled={loading}>Cars</button>
                     <button className={`block w-full text-left p-2 rounded transition-colors duration-200 ${currentView === 'messages' ? 'bg-gray-700' : 'hover:bg-gray-700'}`} onClick={handleMessagesClick} disabled={loading}>Messages</button>
-                    <button className="block w-full text-left p-2 hover:bg-gray-700 rounded text-gray-500 cursor-not-allowed" disabled>Users (coming soon)</button>
                 </nav>
                 <Link to="/profile" className="block w-full text-left p-2 hover:bg-gray-700 rounded mt-auto text-center border-t border-gray-700 pt-4">Exit Admin</Link>
             </aside>
