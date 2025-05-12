@@ -106,8 +106,8 @@ export const Header = () => {
           <Link to="/catalog" className="hover:ml-2" onClick={closeMenu}>
             Catalog
           </Link>
-          <Link to="/services" className="hover:ml-2" onClick={closeMenu}>
-            Services
+          <Link to="/faq" className="hover:ml-2" onClick={closeMenu}>
+            Help
           </Link>
           <Link to="/contact" className="hover:ml-2" onClick={closeMenu}>
             Contact
