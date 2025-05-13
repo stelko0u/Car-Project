@@ -24,7 +24,7 @@ export default function Contacts() {
   });
 
   const maxPhoneLength = 15;
-  const db = getFirestore();
+  const db = getFirestore(); // Ensure Firebase is initialized before this
 
   useEffect(() => {
     const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
@@ -85,6 +85,9 @@ export default function Contacts() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    // Ensure all fields are marked as touched to trigger validation messages if empty
+    setTouched({ name: true, email: true, phone: true, message: true });
+
     const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
     const isNameValid = name.trim() !== "";
     const isEmailValid = email.trim() !== "";
@@ -92,6 +95,7 @@ export default function Contacts() {
     const isPhoneValidLength = numericPhoneLength >= 10;
     const isMessageValid = message.trim() !== "";
 
+    // Re-check all validations for submission
     if (
       isNameValid &&
       isEmailValid &&
@@ -121,23 +125,30 @@ export default function Contacts() {
         setTouched({ name: false, email: false, phone: false, message: false });
       } catch (error) {
         console.error("Error adding document: ", error);
+        // Optionally, set an error state here to show to the user
       }
     } else {
-      setTouched({ name: true, email: true, phone: true, message: true });
+      // Trigger error messages again if not already shown by blur
+      if (!isNameValid) setNameError("Please enter your name.");
+      if (!isEmailValid) setEmailError("Please enter your email address.");
       if (isPhoneEmpty) setPhoneEmptyError("Please enter your phone number.");
-      if (!isPhoneEmpty && !isPhoneValidLength) {
-        setPhoneLengthError("A phone number must be at least 10 digits.");
+      else if (!isPhoneValidLength) setPhoneLengthError("A phone number must be at least 10 digits.");
+      else { // Clear phone errors if phone is valid but other fields might not be
+        setPhoneEmptyError("");
+        setPhoneLengthError("");
       }
+      if (!isMessageValid) setMessageError("Please enter your message.");
     }
   };
 
   return (
-    <div className="bg-[#212121] min-h-screen p-6 text-white flex justify-center items-center">
-      <div className="w-full max-w-2xl flex">
-        <div className="w-1/2 pr-8">
-          <h1 className="text-3xl font-bold mb-2 text-white">Get in touch with us!</h1>
+    <div className="bg-[#212121] min-h-screen p-4 sm:p-6 text-white flex justify-center items-center">
+      <div className="w-full max-w-2xl flex flex-col md:flex-row"> {/* Stacks on mobile, row on medium+ */}
+        {/* Form Section */}
+        <div className="w-full md:w-1/2 md:pr-4 mb-8 md:mb-0">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white">Get in touch with us!</h1>
           <p className="text-gray-400 mb-6 text-sm">Contact us, or send a message online</p>
-          <h2 className="text-xl font-semibold mb-5 text-white">Questions and suggestions</h2>
+          <h2 className="text-lg md:text-xl font-semibold mb-5 text-white">Questions and suggestions</h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-white mb-1">
@@ -149,14 +160,14 @@ export default function Contacts() {
                 id="name"
                 autoComplete="name"
                 className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
-                  nameError && "border-red-500"
+                  nameError ? "border-2 border-red-500" : "border-0" // Added explicit border-0 for non-error state
                 }`}
                 placeholder=""
                 value={name}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
               />
-              {nameError && <p className="text-red-500 text-xs italic">{nameError}</p>}
+              {nameError && <p className="text-red-500 text-xs italic mt-1">{nameError}</p>}
             </div>
 
             <div>
@@ -169,14 +180,14 @@ export default function Contacts() {
                 id="email"
                 autoComplete="email"
                 className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
-                  emailError && "border-red-500"
+                  emailError ? "border-2 border-red-500" : "border-0"
                 }`}
                 placeholder=""
                 value={email}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
               />
-              {emailError && <p className="text-red-500 text-xs italic">{emailError}</p>}
+              {emailError && <p className="text-red-500 text-xs italic mt-1">{emailError}</p>}
             </div>
 
             <div>
@@ -189,7 +200,7 @@ export default function Contacts() {
                 id="phone"
                 autoComplete="tel"
                 className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
-                  (phoneEmptyError || phoneLengthError) && "border-red-500"
+                  (phoneEmptyError || phoneLengthError) ? "border-2 border-red-500" : "border-0"
                 }`}
                 placeholder=""
                 value={phone}
@@ -197,9 +208,9 @@ export default function Contacts() {
                 onBlur={handleBlur}
                 maxLength={maxPhoneLength}
               />
-              {phoneEmptyError && <p className="text-red-500 text-xs italic">{phoneEmptyError}</p>}
+              {phoneEmptyError && <p className="text-red-500 text-xs italic mt-1">{phoneEmptyError}</p>}
               {phoneLengthError && (
-                <p className="text-red-500 text-xs italic">{phoneLengthError}</p>
+                <p className="text-red-500 text-xs italic mt-1">{phoneLengthError}</p>
               )}
             </div>
 
@@ -212,14 +223,14 @@ export default function Contacts() {
                 name="message"
                 rows={3}
                 className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
-                  messageError && "border-red-500"
+                  messageError ? "border-2 border-red-500" : "border-0"
                 }`}
                 placeholder=""
                 value={message}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
               />
-              {messageError && <p className="text-red-500 text-xs italic">{messageError}</p>}
+              {messageError && <p className="text-red-500 text-xs italic mt-1">{messageError}</p>}
             </div>
 
             <div className="flex items-center">
@@ -240,7 +251,7 @@ export default function Contacts() {
               <button
                 type="submit"
                 className={`flex w-full justify-center items-center rounded-md bg-[#146C5F] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#10594F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#146C5F] ${
-                  !canSubmit && "opacity-50 cursor-not-allowed"
+                  !canSubmit ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={!canSubmit}
               >
@@ -257,24 +268,27 @@ export default function Contacts() {
             </div>
           </form>
         </div>
-        <div className="w-1/2 pl-8">
-          <h2 className="text-xl font-semibold mb-5 text-white">Our contacts</h2>
-          <p className="mb-2">
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />
-            Located in: LevskiPrimorski, ul. "Studentska" 1, 9010 Varna
-          </p>
-          <p className="mb-2">
-            <FontAwesomeIcon icon={faPhone} className="mr-2" />
-            Call us: 0887089044
-          </p>
-          <p className="mb-2">
-            <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-            Email us at: AutoCarsHelp@gmail.com
-          </p>
+        {/* Contact Details Section */}
+        <div className="w-full md:w-1/2 md:pl-4">
+          <h2 className="text-lg md:text-xl font-semibold mb-5 text-white mt-8 md:mt-0">Our contacts</h2>
+          <div className="space-y-3 text-sm"> {/* Added space-y for better spacing and text-sm */}
+            <p className="flex items-start">
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 mt-1 text-gray-300 w-4" /> {/* Adjusted icon styling */}
+              <span>Located in: LevskiPrimorski, ul. "Studentska" 1, 9010 Varna</span>
+            </p>
+            <p className="flex items-center">
+              <FontAwesomeIcon icon={faPhone} className="mr-3 text-gray-300 w-4" />
+              <span>Call us: 0887089044</span>
+            </p>
+            <p className="flex items-center">
+              <FontAwesomeIcon icon={faEnvelope} className="mr-3 text-gray-300 w-4" />
+              <span>Email us at: AutoCarsHelp@gmail.com</span>
+            </p>
+          </div>
         </div>
       </div>
       {isSuccess && (
-        <div className="fixed top-4 left-4 bg-green-500 text-white py-2 px-4 rounded-md shadow-md z-50">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-auto sm:max-w-md sm:left-4 sm:translate-x-0 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg z-50 transition-all duration-300 ease-out">
           Your question/suggestion was sent successfully!
         </div>
       )}
