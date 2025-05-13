@@ -24,7 +24,7 @@ export default function Contacts() {
   });
 
   const maxPhoneLength = 15;
-  const db = getFirestore(); // Ensure Firebase is initialized before this
+  const db = getFirestore(); 
 
   useEffect(() => {
     const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
@@ -85,7 +85,6 @@ export default function Contacts() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Ensure all fields are marked as touched to trigger validation messages if empty
     setTouched({ name: true, email: true, phone: true, message: true });
 
     const numericPhoneLength = phone.replace(/[^0-9]/g, "").length;
@@ -95,7 +94,6 @@ export default function Contacts() {
     const isPhoneValidLength = numericPhoneLength >= 10;
     const isMessageValid = message.trim() !== "";
 
-    // Re-check all validations for submission
     if (
       isNameValid &&
       isEmailValid &&
@@ -125,15 +123,13 @@ export default function Contacts() {
         setTouched({ name: false, email: false, phone: false, message: false });
       } catch (error) {
         console.error("Error adding document: ", error);
-        // Optionally, set an error state here to show to the user
       }
     } else {
-      // Trigger error messages again if not already shown by blur
       if (!isNameValid) setNameError("Please enter your name.");
       if (!isEmailValid) setEmailError("Please enter your email address.");
       if (isPhoneEmpty) setPhoneEmptyError("Please enter your phone number.");
       else if (!isPhoneValidLength) setPhoneLengthError("A phone number must be at least 10 digits.");
-      else { // Clear phone errors if phone is valid but other fields might not be
+      else { 
         setPhoneEmptyError("");
         setPhoneLengthError("");
       }
@@ -143,8 +139,7 @@ export default function Contacts() {
 
   return (
     <div className="bg-[#212121] min-h-screen p-4 sm:p-6 text-white flex justify-center items-center">
-      <div className="w-full max-w-2xl flex flex-col md:flex-row"> {/* Stacks on mobile, row on medium+ */}
-        {/* Form Section */}
+      <div className="w-full max-w-2xl flex flex-col md:flex-row"> 
         <div className="w-full md:w-1/2 md:pr-4 mb-8 md:mb-0">
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white">Get in touch with us!</h1>
           <p className="text-gray-400 mb-6 text-sm">Contact us, or send a message online</p>
@@ -160,7 +155,7 @@ export default function Contacts() {
                 id="name"
                 autoComplete="name"
                 className={`bg-[#D9D9D9] text-black block w-full rounded-md border-0 py-2 px-3 shadow-sm focus:ring-2 focus:ring-inset focus:ring-[#146C5F] text-sm placeholder-gray-500 ${
-                  nameError ? "border-2 border-red-500" : "border-0" // Added explicit border-0 for non-error state
+                  nameError ? "border-2 border-red-500" : "border-0" 
                 }`}
                 placeholder=""
                 value={name}
@@ -268,12 +263,11 @@ export default function Contacts() {
             </div>
           </form>
         </div>
-        {/* Contact Details Section */}
         <div className="w-full md:w-1/2 md:pl-4">
           <h2 className="text-lg md:text-xl font-semibold mb-5 text-white mt-8 md:mt-0">Our contacts</h2>
-          <div className="space-y-3 text-sm"> {/* Added space-y for better spacing and text-sm */}
+          <div className="space-y-3 text-sm"> 
             <p className="flex items-start">
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 mt-1 text-gray-300 w-4" /> {/* Adjusted icon styling */}
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 mt-1 text-gray-300 w-4" /> 
               <span>Located in: LevskiPrimorski, ul. "Studentska" 1, 9010 Varna</span>
             </p>
             <p className="flex items-center">
